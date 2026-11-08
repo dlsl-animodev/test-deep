@@ -41,6 +41,12 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', upstream.headers.get('content-type') || 'application/json');
     return res.status(upstream.status).send(text);
   } catch (err) {
-    return res.status(502).json({ error: 'Upstream request failed', detail: String(err && err.message) });
+    const cause = err && err.cause;
+    return res.status(502).json({
+      error: 'Upstream request failed',
+      detail: String(err && err.message),
+      cause: cause ? { code: cause.code, message: cause.message } : undefined,
+      target: url,
+    });
   }
 }
