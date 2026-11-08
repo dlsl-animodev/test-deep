@@ -1,0 +1,1062 @@
+[
+  {
+    "name": "Balintawak",
+    "expressways": [
+      "nlex"
+    ],
+    "lat": 14.67857,
+    "lng": 121.000365,
+    "source": "osm-search",
+    "osmName": "Balintawak Toll Plaza A"
+  },
+  {
+    "name": "Mindanao Ave.",
+    "expressways": [
+      "nlex"
+    ],
+    "lat": 14.693535,
+    "lng": 121.017415,
+    "source": "osm-search",
+    "osmName": "Mindanao Toll Plaza A"
+  },
+  {
+    "name": "Karuhatan",
+    "expressways": [
+      "nlex"
+    ],
+    "lat": 14.701437,
+    "lng": 120.996693,
+    "source": "approx-snapped",
+    "osmName": "Karuhatan, Valenzuela (2755 m from road)"
+  },
+  {
+    "name": "Valenzuela",
+    "expressways": [
+      "nlex"
+    ],
+    "lat": 14.708112,
+    "lng": 120.993087,
+    "source": "approx-snapped",
+    "osmName": "Paso de Blas, Valenzuela (248 m from road)"
+  },
+  {
+    "name": "Meycauayan",
+    "expressways": [
+      "nlex"
+    ],
+    "lat": 14.745886,
+    "lng": 120.972521,
+    "source": "osm-junction",
+    "osmName": "Meycauayan"
+  },
+  {
+    "name": "Marilao",
+    "expressways": [
+      "nlex"
+    ],
+    "lat": 14.776568,
+    "lng": 120.955966,
+    "source": "osm-junction",
+    "osmName": "Marilao"
+  },
+  {
+    "name": "Ciudad de Victoria",
+    "expressways": [
+      "nlex"
+    ],
+    "lat": 14.790919,
+    "lng": 120.948439,
+    "source": "approx-snapped",
+    "osmName": "Philippine Arena, Bocaue (0 m from road)"
+  },
+  {
+    "name": "Bocaue",
+    "expressways": [
+      "nlex"
+    ],
+    "lat": 14.809541,
+    "lng": 120.938134,
+    "source": "osm-junction",
+    "osmName": "Bocaue"
+  },
+  {
+    "name": "Tambubong",
+    "expressways": [
+      "nlex"
+    ],
+    "lat": 14.812953,
+    "lng": 120.936462,
+    "source": "osm-junction",
+    "osmName": "Tambubong"
+  },
+  {
+    "name": "Balagtas",
+    "expressways": [
+      "nlex"
+    ],
+    "lat": 14.834025,
+    "lng": 120.901619,
+    "source": "osm-junction",
+    "osmName": "Balagtas"
+  },
+  {
+    "name": "Tabang",
+    "expressways": [
+      "nlex"
+    ],
+    "lat": 14.849941,
+    "lng": 120.878297,
+    "source": "approx-snapped",
+    "osmName": "Tabang, Guiguinto (2622 m from road)"
+  },
+  {
+    "name": "Sta. Rita",
+    "expressways": [
+      "nlex"
+    ],
+    "lat": 14.863624,
+    "lng": 120.856683,
+    "source": "osm-junction",
+    "osmName": "Santa Rita"
+  },
+  {
+    "name": "Pulilan",
+    "expressways": [
+      "nlex"
+    ],
+    "lat": 14.906201,
+    "lng": 120.818962,
+    "source": "osm-junction",
+    "osmName": "Pulilan"
+  },
+  {
+    "name": "San Simon",
+    "expressways": [
+      "nlex"
+    ],
+    "lat": 14.986161,
+    "lng": 120.752286,
+    "source": "osm-junction",
+    "osmName": "San Simon"
+  },
+  {
+    "name": "San Fernando",
+    "expressways": [
+      "nlex"
+    ],
+    "lat": 15.052418,
+    "lng": 120.692283,
+    "source": "osm-junction",
+    "osmName": "San Fernando"
+  },
+  {
+    "name": "Mexico",
+    "expressways": [
+      "nlex"
+    ],
+    "lat": 15.103636,
+    "lng": 120.664559,
+    "source": "osm-junction",
+    "osmName": "Mexico"
+  },
+  {
+    "name": "Angeles",
+    "expressways": [
+      "nlex"
+    ],
+    "lat": 15.164947,
+    "lng": 120.612085,
+    "source": "osm-junction",
+    "osmName": "Angeles"
+  },
+  {
+    "name": "Dau",
+    "expressways": [
+      "nlex"
+    ],
+    "lat": 15.176254,
+    "lng": 120.60573,
+    "source": "osm-junction",
+    "osmName": "Dau"
+  },
+  {
+    "name": "Sta. Ines",
+    "expressways": [
+      "nlex"
+    ],
+    "lat": 15.223361,
+    "lng": 120.587233,
+    "source": "osm-junction",
+    "osmName": "Santa Ines"
+  },
+  {
+    "name": "Mabalacat (Mabiga)",
+    "expressways": [
+      "nlex",
+      "sctex"
+    ],
+    "lat": 15.197466,
+    "lng": 120.586206,
+    "source": "osm-junction",
+    "osmName": "Mabiga"
+  },
+  {
+    "name": "Tipo/Subic",
+    "expressways": [
+      "sctex"
+    ],
+    "lat": 14.841298,
+    "lng": 120.351985,
+    "source": "osm-junction",
+    "osmName": "Tipo"
+  },
+  {
+    "name": "Dinalupihan",
+    "expressways": [
+      "sctex"
+    ],
+    "lat": 14.859633,
+    "lng": 120.454379,
+    "source": "osm-junction",
+    "osmName": "Dinalupihan"
+  },
+  {
+    "name": "Floridablanca",
+    "expressways": [
+      "sctex"
+    ],
+    "lat": 15.017968,
+    "lng": 120.472808,
+    "source": "osm-junction",
+    "osmName": "Floridablanca"
+  },
+  {
+    "name": "Porac",
+    "expressways": [
+      "sctex"
+    ],
+    "lat": 15.126433,
+    "lng": 120.510173,
+    "source": "osm-junction",
+    "osmName": "Porac"
+  },
+  {
+    "name": "Clark South",
+    "expressways": [
+      "sctex"
+    ],
+    "lat": 15.178184,
+    "lng": 120.56936,
+    "source": "osm-junction",
+    "osmName": "Clark South"
+  },
+  {
+    "name": "Clark North",
+    "expressways": [
+      "sctex"
+    ],
+    "lat": 15.235514,
+    "lng": 120.567115,
+    "source": "osm-junction",
+    "osmName": "Clark North"
+  },
+  {
+    "name": "Dolores",
+    "expressways": [
+      "sctex"
+    ],
+    "lat": 15.242191,
+    "lng": 120.572236,
+    "source": "osm-junction",
+    "osmName": "Dolores"
+  },
+  {
+    "name": "Bamban/New Clark City",
+    "expressways": [
+      "sctex"
+    ],
+    "lat": 15.286972,
+    "lng": 120.606026,
+    "source": "osm-junction",
+    "osmName": "New Clark City"
+  },
+  {
+    "name": "Concepcion",
+    "expressways": [
+      "sctex"
+    ],
+    "lat": 15.318006,
+    "lng": 120.624296,
+    "source": "osm-junction",
+    "osmName": "Concepcion"
+  },
+  {
+    "name": "Hacienda Luisita",
+    "expressways": [
+      "sctex"
+    ],
+    "lat": 15.434119,
+    "lng": 120.666116,
+    "source": "osm-junction",
+    "osmName": "Hacienda Luisita"
+  },
+  {
+    "name": "Tarlac",
+    "expressways": [
+      "sctex"
+    ],
+    "lat": 15.47438,
+    "lng": 120.677905,
+    "source": "osm-junction",
+    "osmName": "Tarlac City Interchange"
+  },
+  {
+    "name": "La Paz",
+    "expressways": [
+      "tplex"
+    ],
+    "lat": 15.481536,
+    "lng": 120.678335,
+    "source": "approx-snapped",
+    "osmName": "La Paz, Tarlac (7040 m from road)"
+  },
+  {
+    "name": "Victoria",
+    "expressways": [
+      "tplex"
+    ],
+    "lat": 15.544842,
+    "lng": 120.645503,
+    "source": "osm-junction",
+    "osmName": "Victoria"
+  },
+  {
+    "name": "Gerona",
+    "expressways": [
+      "tplex"
+    ],
+    "lat": 15.606885,
+    "lng": 120.631031,
+    "source": "approx-snapped",
+    "osmName": "Gerona, Tarlac (3476 m from road)"
+  },
+  {
+    "name": "Paniqui",
+    "expressways": [
+      "tplex"
+    ],
+    "lat": 15.6718,
+    "lng": 120.613586,
+    "source": "approx-snapped",
+    "osmName": "Paniqui, Tarlac (2993 m from road)"
+  },
+  {
+    "name": "Moncada",
+    "expressways": [
+      "tplex"
+    ],
+    "lat": 15.721839,
+    "lng": 120.614155,
+    "source": "approx-snapped",
+    "osmName": "Moncada, Tarlac (4629 m from road)"
+  },
+  {
+    "name": "Carmen",
+    "expressways": [
+      "tplex"
+    ],
+    "lat": 15.87562,
+    "lng": 120.622648,
+    "source": "osm-search",
+    "osmName": "Carmen Interchange"
+  },
+  {
+    "name": "Urdaneta",
+    "expressways": [
+      "tplex"
+    ],
+    "lat": 16.000675,
+    "lng": 120.584523,
+    "source": "osm-junction",
+    "osmName": "Urdaneta"
+  },
+  {
+    "name": "Binalonan",
+    "expressways": [
+      "tplex"
+    ],
+    "lat": 16.044411,
+    "lng": 120.562801,
+    "source": "osm-junction",
+    "osmName": "Binalonan"
+  },
+  {
+    "name": "Pozorrubbio",
+    "expressways": [
+      "tplex"
+    ],
+    "lat": 16.127167,
+    "lng": 120.522562,
+    "source": "osm-junction",
+    "osmName": "Pozorrubio"
+  },
+  {
+    "name": "Sison",
+    "expressways": [
+      "tplex"
+    ],
+    "lat": 16.17784,
+    "lng": 120.513841,
+    "source": "osm-junction",
+    "osmName": "Sison"
+  },
+  {
+    "name": "Rosario/Baguio",
+    "expressways": [
+      "tplex"
+    ],
+    "lat": 16.217459,
+    "lng": 120.498433,
+    "source": "osm-search",
+    "osmName": "Rosario Toll Plaza"
+  },
+  {
+    "name": "España",
+    "expressways": [
+      "nlex-connector"
+    ],
+    "lat": 14.61744,
+    "lng": 120.992064,
+    "source": "osm-junction",
+    "osmName": "España"
+  },
+  {
+    "name": "Magsaysay",
+    "expressways": [
+      "nlex-connector"
+    ],
+    "lat": 14.603508,
+    "lng": 121.005554,
+    "source": "osm-junction",
+    "osmName": "Magsaysay Boulevard"
+  },
+  {
+    "name": "C-3 Road/5th Ave.",
+    "expressways": [
+      "nlex-connector",
+      "harbor-link"
+    ],
+    "lat": 14.645355,
+    "lng": 120.976177,
+    "source": "approx-snapped",
+    "osmName": "5th Avenue, Caloocan (800 m from road)"
+  },
+  {
+    "name": "Karuhatan/Valenzuela",
+    "expressways": [
+      "harbor-link"
+    ],
+    "lat": 14.694352,
+    "lng": 120.979302,
+    "source": "osm-junction",
+    "osmName": "Karuhatan"
+  },
+  {
+    "name": "Malabon/Dagat-Dagatan",
+    "expressways": [
+      "harbor-link"
+    ],
+    "lat": 14.657331,
+    "lng": 120.973812,
+    "source": "approx-snapped",
+    "osmName": "Dagat-Dagatan, Caloocan (836 m from road)"
+  },
+  {
+    "name": "R-10/Port of Manila",
+    "expressways": [
+      "harbor-link"
+    ],
+    "lat": 14.640477,
+    "lng": 120.957289,
+    "source": "approx-snapped",
+    "osmName": "Navotas Fish Port (820 m from road)"
+  },
+  {
+    "name": "Harbor Link Interchange",
+    "expressways": [
+      "harbor-link",
+      "nlex"
+    ],
+    "lat": 14.697036,
+    "lng": 120.998881,
+    "source": "osm-junction",
+    "osmName": "Harbor Link Interchange"
+  },
+  {
+    "name": "Balintawak",
+    "expressways": [
+      "skyway-stage-3"
+    ],
+    "lat": 14.651917,
+    "lng": 120.997165,
+    "source": "osm-route",
+    "osmName": "Skyway 3 on-ramp at A. Bonifacio Ave (from OSRM route)"
+  },
+  {
+    "name": "Buendia",
+    "expressways": [
+      "skyway-stage-3",
+      "skyway"
+    ],
+    "lat": 14.565545,
+    "lng": 121.003281,
+    "source": "osm-junction",
+    "osmName": "Buendia"
+  },
+  {
+    "name": "Quirino",
+    "expressways": [
+      "skyway-stage-3"
+    ],
+    "lat": 14.573595,
+    "lng": 120.998945,
+    "source": "osm-junction",
+    "osmName": "Quirino (Skyway)"
+  },
+  {
+    "name": "Plaza Dilao",
+    "expressways": [
+      "skyway-stage-3"
+    ],
+    "lat": 14.580538,
+    "lng": 120.999705,
+    "source": "approx-snapped",
+    "osmName": "Plaza Dilao, Paco, Manila (31 m from road)"
+  },
+  {
+    "name": "Nagtahan",
+    "expressways": [
+      "skyway-stage-3"
+    ],
+    "lat": 14.582534,
+    "lng": 121.001585,
+    "source": "osm-junction",
+    "osmName": "Nagtahan"
+  },
+  {
+    "name": "E. Rodriguez",
+    "expressways": [
+      "skyway-stage-3"
+    ],
+    "lat": 14.619011,
+    "lng": 121.014828,
+    "source": "osm-junction",
+    "osmName": "G. Araneta"
+  },
+  {
+    "name": "Quezon Ave.",
+    "expressways": [
+      "skyway-stage-3"
+    ],
+    "lat": 14.628346,
+    "lng": 121.013205,
+    "source": "approx-snapped",
+    "osmName": "Quezon Avenue, Santa Mesa Heights, Quezon City (246 m from road)"
+  },
+  {
+    "name": "Magallanes",
+    "expressways": [
+      "slex"
+    ],
+    "lat": 14.530461,
+    "lng": 121.022133,
+    "source": "osm-junction",
+    "osmName": "Magallanes"
+  },
+  {
+    "name": "Magallanes (Skyway)",
+    "expressways": [
+      "skyway"
+    ],
+    "lat": 14.526998,
+    "lng": 121.02419,
+    "source": "osm-junction",
+    "osmName": "Magallanes"
+  },
+  {
+    "name": "C-5",
+    "expressways": [
+      "slex",
+      "skyway"
+    ],
+    "lat": 14.506428,
+    "lng": 121.035268,
+    "source": "osm-junction",
+    "osmName": "C-5"
+  },
+  {
+    "name": "Amorsolo",
+    "expressways": [
+      "skyway"
+    ],
+    "lat": 14.548034,
+    "lng": 121.012814,
+    "source": "osm-junction",
+    "osmName": "Amorsolo"
+  },
+  {
+    "name": "Bicutan",
+    "expressways": [
+      "slex",
+      "skyway"
+    ],
+    "lat": 14.485143,
+    "lng": 121.045247,
+    "source": "osm-junction",
+    "osmName": "Bicutan"
+  },
+  {
+    "name": "NAIAX",
+    "expressways": [
+      "slex",
+      "skyway"
+    ],
+    "lat": 14.519408,
+    "lng": 121.028679,
+    "source": "approx-snapped",
+    "osmName": "Villamor Air Base, Pasay (532 m from road)"
+  },
+  {
+    "name": "Sucat",
+    "expressways": [
+      "slex",
+      "skyway"
+    ],
+    "lat": 14.455928,
+    "lng": 121.045205,
+    "source": "osm-junction",
+    "osmName": "Sucat"
+  },
+  {
+    "name": "Alabang",
+    "expressways": [
+      "slex",
+      "skyway"
+    ],
+    "lat": 14.419038,
+    "lng": 121.045384,
+    "source": "approx-snapped",
+    "osmName": "Alabang, Muntinlupa (113 m from road)"
+  },
+  {
+    "name": "Filinvest",
+    "expressways": [
+      "slex"
+    ],
+    "lat": 14.412889,
+    "lng": 121.044277,
+    "source": "osm-junction",
+    "osmName": "Filinvest"
+  },
+  {
+    "name": "MCX",
+    "expressways": [
+      "slex"
+    ],
+    "lat": 14.387,
+    "lng": 121.042,
+    "source": "manual-approx",
+    "osmName": "SLEX–MCX junction, estimated"
+  },
+  {
+    "name": "Susana Heights",
+    "expressways": [
+      "slex"
+    ],
+    "lat": 14.38012,
+    "lng": 121.041088,
+    "source": "osm-junction",
+    "osmName": "Susana Heights"
+  },
+  {
+    "name": "San Pedro",
+    "expressways": [
+      "slex"
+    ],
+    "lat": 14.370376,
+    "lng": 121.042584,
+    "source": "osm-junction",
+    "osmName": "San Pedro"
+  },
+  {
+    "name": "Southwoods",
+    "expressways": [
+      "slex"
+    ],
+    "lat": 14.331103,
+    "lng": 121.055394,
+    "source": "osm-junction",
+    "osmName": "Southwoods"
+  },
+  {
+    "name": "Carmona",
+    "expressways": [
+      "slex"
+    ],
+    "lat": 14.322712,
+    "lng": 121.061376,
+    "source": "osm-junction",
+    "osmName": "Carmona"
+  },
+  {
+    "name": "Mamplasan",
+    "expressways": [
+      "slex"
+    ],
+    "lat": 14.305066,
+    "lng": 121.076665,
+    "source": "osm-junction",
+    "osmName": "Mamplasan"
+  },
+  {
+    "name": "Sta. Rosa",
+    "expressways": [
+      "slex"
+    ],
+    "lat": 14.288275,
+    "lng": 121.08688,
+    "source": "osm-junction",
+    "osmName": "Santa Rosa"
+  },
+  {
+    "name": "ABI/Greenfield",
+    "expressways": [
+      "slex"
+    ],
+    "lat": 14.251894,
+    "lng": 121.105553,
+    "source": "manual-approx",
+    "osmName": "Eton City junction (SLEX), between Sta. Rosa and Cabuyao"
+  },
+  {
+    "name": "Cabuyao",
+    "expressways": [
+      "slex"
+    ],
+    "lat": 14.23877,
+    "lng": 121.113311,
+    "source": "osm-junction",
+    "osmName": "Cabuyao"
+  },
+  {
+    "name": "Silangan",
+    "expressways": [
+      "slex"
+    ],
+    "lat": 14.228225,
+    "lng": 121.119749,
+    "source": "osm-junction",
+    "osmName": "Silangan"
+  },
+  {
+    "name": "Calamba",
+    "expressways": [
+      "slex",
+      "star"
+    ],
+    "lat": 14.193448,
+    "lng": 121.141001,
+    "source": "osm-junction",
+    "osmName": "Calamba"
+  },
+  {
+    "name": "Merville",
+    "expressways": [
+      "skyway"
+    ],
+    "lat": 14.505327,
+    "lng": 121.035741,
+    "source": "approx-snapped",
+    "osmName": "Merville, Parañaque (1735 m from road)"
+  },
+  {
+    "name": "Don Bosco",
+    "expressways": [
+      "skyway"
+    ],
+    "lat": 14.543877,
+    "lng": 121.015052,
+    "source": "osm-junction",
+    "osmName": "Don Bosco"
+  },
+  {
+    "name": "Sto. Tomas",
+    "expressways": [
+      "star"
+    ],
+    "lat": 14.126508,
+    "lng": 121.13865,
+    "source": "osm-junction",
+    "osmName": "Santo Tomas"
+  },
+  {
+    "name": "Tanauan",
+    "expressways": [
+      "star"
+    ],
+    "lat": 14.082923,
+    "lng": 121.131883,
+    "source": "osm-junction",
+    "osmName": "Tanauan City"
+  },
+  {
+    "name": "Malvar",
+    "expressways": [
+      "star"
+    ],
+    "lat": 14.035119,
+    "lng": 121.152186,
+    "source": "osm-junction",
+    "osmName": "Malvar"
+  },
+  {
+    "name": "Sto. Toribio",
+    "expressways": [
+      "star"
+    ],
+    "lat": 13.977681,
+    "lng": 121.149569,
+    "source": "osm-junction",
+    "osmName": "Santo Toribio"
+  },
+  {
+    "name": "Lipa",
+    "expressways": [
+      "star"
+    ],
+    "lat": 13.942088,
+    "lng": 121.138518,
+    "source": "osm-junction",
+    "osmName": "Lipa City"
+  },
+  {
+    "name": "Ibaan",
+    "expressways": [
+      "star"
+    ],
+    "lat": 13.844181,
+    "lng": 121.121002,
+    "source": "osm-junction",
+    "osmName": "Ibaan"
+  },
+  {
+    "name": "Batangas",
+    "expressways": [
+      "star"
+    ],
+    "lat": 13.797206,
+    "lng": 121.073767,
+    "source": "osm-junction",
+    "osmName": "Balagtas (STAR)"
+  },
+  {
+    "name": "Skyway",
+    "expressways": [
+      "naiax"
+    ],
+    "lat": 14.519408,
+    "lng": 121.028679,
+    "source": "manual-approx",
+    "osmName": "NAIAX–Skyway junction, estimated"
+  },
+  {
+    "name": "Andrews Ave./Terminal 3",
+    "expressways": [
+      "naiax"
+    ],
+    "lat": 14.51753,
+    "lng": 121.01818,
+    "source": "manual-approx",
+    "osmName": "Andrews Avenue near Terminal 3"
+  },
+  {
+    "name": "Aurora Blvd. (Tramo)",
+    "expressways": [
+      "naiax"
+    ],
+    "lat": 14.52985,
+    "lng": 121.0046,
+    "source": "manual-approx",
+    "osmName": "Aurora Blvd (Tramo)"
+  },
+  {
+    "name": "NAIA Terminal 1",
+    "expressways": [
+      "naiax"
+    ],
+    "lat": 14.50509,
+    "lng": 121.00572,
+    "source": "manual-approx",
+    "osmName": "NAIA Terminal 1"
+  },
+  {
+    "name": "NAIA Terminal 2",
+    "expressways": [
+      "naiax"
+    ],
+    "lat": 14.50874,
+    "lng": 121.01174,
+    "source": "manual-approx",
+    "osmName": "NAIA Terminal 2"
+  },
+  {
+    "name": "NAIA Terminal 3",
+    "expressways": [
+      "naiax"
+    ],
+    "lat": 14.52171,
+    "lng": 121.013094,
+    "source": "manual-approx",
+    "osmName": "NAIA Terminal 3"
+  },
+  {
+    "name": "Entertainment City",
+    "expressways": [
+      "naiax"
+    ],
+    "lat": 14.517381,
+    "lng": 120.99418,
+    "source": "manual-approx",
+    "osmName": "NAIAX at Tambo / Entertainment City"
+  },
+  {
+    "name": "Macapagal Blvd.",
+    "expressways": [
+      "naiax"
+    ],
+    "lat": 14.5262,
+    "lng": 120.9905,
+    "source": "manual-approx",
+    "osmName": "NAIAX at Macapagal Blvd"
+  },
+  {
+    "name": "CAVITEX",
+    "expressways": [
+      "naiax"
+    ],
+    "lat": 14.50996,
+    "lng": 120.99137,
+    "source": "manual-approx",
+    "osmName": "NAIAX–CAVITEX end near PITX"
+  },
+  {
+    "name": "Parañaque",
+    "expressways": [
+      "cavitex"
+    ],
+    "lat": 14.488165,
+    "lng": 120.982274,
+    "source": "osm-search",
+    "osmName": "Parañaque Toll Plaza"
+  },
+  {
+    "name": "Bacoor/Zapote",
+    "expressways": [
+      "cavitex"
+    ],
+    "lat": 14.469867,
+    "lng": 120.958747,
+    "source": "approx-snapped",
+    "osmName": "Zapote, Bacoor (1003 m from road)"
+  },
+  {
+    "name": "Kawit",
+    "expressways": [
+      "cavitex"
+    ],
+    "lat": 14.435873,
+    "lng": 120.911083,
+    "source": "osm-junction",
+    "osmName": "Kawit"
+  },
+  {
+    "name": "Sucat Rd./Dr. A. Santos Ave.",
+    "expressways": [
+      "cavitex-c5"
+    ],
+    "lat": 14.488225,
+    "lng": 120.982269,
+    "source": "approx-snapped",
+    "osmName": "Dr. A. Santos Avenue, Parañaque (1868 m from road)"
+  },
+  {
+    "name": "C5 Rd. Ext./C.P. Garcia",
+    "expressways": [
+      "cavitex-c5"
+    ],
+    "lat": 14.490313,
+    "lng": 120.984242,
+    "source": "osm-junction",
+    "osmName": "CAVITEX–C-5 Link Interchange"
+  },
+  {
+    "name": "Greenfield",
+    "expressways": [
+      "calax"
+    ],
+    "lat": 14.303436,
+    "lng": 121.078211,
+    "source": "manual-approx",
+    "osmName": "CALAX–SLEX Mamplasan interchange"
+  },
+  {
+    "name": "Technopark",
+    "expressways": [
+      "calax"
+    ],
+    "lat": 14.276062,
+    "lng": 121.052134,
+    "source": "osm-junction",
+    "osmName": "Laguna Technopark"
+  },
+  {
+    "name": "Laguna Blvd.",
+    "expressways": [
+      "calax"
+    ],
+    "lat": 14.248229,
+    "lng": 121.056624,
+    "source": "osm-junction",
+    "osmName": "Laguna Boulevard"
+  },
+  {
+    "name": "Sta. Rosa/Tagaytay",
+    "expressways": [
+      "calax"
+    ],
+    "lat": 14.236177,
+    "lng": 121.046585,
+    "source": "osm-junction",
+    "osmName": "Santa Rosa–Tagaytay"
+  },
+  {
+    "name": "Silang East",
+    "expressways": [
+      "calax"
+    ],
+    "lat": 14.232096,
+    "lng": 121.003494,
+    "source": "osm-junction",
+    "osmName": "Silang East"
+  },
+  {
+    "name": "Silang Interchange",
+    "expressways": [
+      "calax"
+    ],
+    "lat": 14.253458,
+    "lng": 120.971019,
+    "source": "osm-junction",
+    "osmName": "Silang"
+  }
+]
