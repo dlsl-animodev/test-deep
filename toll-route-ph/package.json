@@ -1,0 +1,29 @@
+{
+  "name": "toll-route-ph",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Plan a drive in Luzon and see every toll plaza you enter and exit, with the toll fee per expressway.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "geocode": "node scripts/geocode-plazas.ts && node scripts/fill-missing.ts",
+    "check-names": "node scripts/check-plaza-names.ts"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4"
+  },
+  "devDependencies": {
+    "@types/leaflet": "1.9",
+    "@types/node": "^22.20.5",
+    "typescript": "5.8",
+    "vite": "^8.3.6",
+    "vitest": "^5.1.0"
+  }
+}
