@@ -943,3 +943,18 @@ button.row:active,
     filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9) saturate(0.6);
   }
 }
+
+/* Quick balance (RFID tab) */
+.qb { margin: 20px 0 8px; }
+.qb-title { font-size: 1.1rem; font-weight: 600; margin: 0 0 10px; }
+.qb-form { display: flex; gap: 8px; align-items: center; }
+.qb-form .search-pill { flex: 1; }
+.qb-submit {
+  border: 0; border-radius: 999px; padding: 10px 16px;
+  font: inherit; font-weight: 600; background: #007aff; color: #fff; cursor: pointer;
+}
+.qb-submit:disabled { opacity: 0.6; cursor: default; }
+.qb-result {
+  margin: 10px 0 0; padding: 12px; border-radius: 12px; overflow-x: auto;
+  font-size: 0.85rem; background: rgba(120, 120, 128, 0.12); white-space: pre-wrap; word-break: break-word;
+}

@@ -13,6 +13,7 @@ import type { LatLng, PlazaRecord, Route, TollSegment, VehicleClass } from './co
 import { $, ago, duration, h, icon, ICONS, km, peso } from './ui/dom.ts';
 import { createSheet, isWide } from './ui/sheet.ts';
 import { renderGarage } from './ui/garage.ts';
+import { mountQuickBalance } from './ui/quickbalance.ts';
 
 const plazas = plazaData as PlazaRecord[];
 const APPROX_SOURCES = new Set(['approx-snapped', 'manual-approx']);
@@ -306,6 +307,7 @@ function renderVehicles() {
     ...state.garage.map((v) => h('option', { value: v.id, selected: v.id === state.vehicleId }, v.name || v.plate || 'Vehicle')),
   );
   renderGarage($('#garage'), state.garage, { save: saveVehicle, remove: removeVehicle });
+  mountQuickBalance();
 }
 
 function saveVehicle(v: Vehicle) {

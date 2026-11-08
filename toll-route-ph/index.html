@@ -54,6 +54,18 @@
         <!-- RFID -->
         <div id="view-rfid" class="view" hidden>
           <div id="garage"></div>
+
+          <section class="qb" aria-labelledby="qb-title">
+            <h2 id="qb-title" class="qb-title">Quick balance</h2>
+            <form id="qb-form" class="qb-form">
+              <label class="search-pill">
+                <input id="qb-account" type="text" inputmode="numeric" autocomplete="off" placeholder="Card / account number" aria-label="Card or account number" required />
+              </label>
+              <button type="submit" id="qb-submit" class="qb-submit">Check</button>
+            </form>
+            <p id="qb-status" class="status" role="status" aria-live="polite"></p>
+            <pre id="qb-result" class="qb-result" hidden></pre>
+          </section>
         </div>
 
         <p class="fineprint">
