@@ -3,17 +3,22 @@ import 'leaflet/dist/leaflet.css';
 import './style.css';
 
 import plazaData from './data/plazas.json';
-import { EXPRESSWAY_BY_ID } from './core/expressways.ts';
+import { EXPRESSWAY_BY_ID, type RfidSystem } from './core/expressways.ts';
 import { detectTollSegments } from './core/detect.ts';
-import { ExpresswayPhFareProvider, priceSegments, type TripPrice } from './core/fares.ts';
+import { ExpresswayPhFareProvider, priceSegments, type KeyValueStore, type TripPrice } from './core/fares.ts';
 import { fetchRoutes } from './core/routing.ts';
 import { searchPlaces, type Place } from './core/geocode.ts';
+import { deductTrip, loadGarage, saveGarage, tripCoverage, type Vehicle } from './core/garage.ts';
 import type { LatLng, PlazaRecord, Route, TollSegment, VehicleClass } from './core/types.ts';
+import { $, ago, duration, h, icon, ICONS, km, peso } from './ui/dom.ts';
+import { createSheet, isWide } from './ui/sheet.ts';
+import { renderGarage } from './ui/garage.ts';
 
 const plazas = plazaData as PlazaRecord[];
 const APPROX_SOURCES = new Set(['approx-snapped', 'manual-approx']);
+const RFID_NAME: Record<RfidSystem, string> = { easytrip: 'Easytrip', autosweep: 'Autosweep' };
 
-let storage: Storage | undefined;
+let storage: KeyValueStore | undefined;
 try {
   storage = window.localStorage;
 } catch {
@@ -36,137 +41,161 @@ const state = {
   from: null as Endpoint | null,
   to: null as Endpoint | null,
   vclass: 1 as VehicleClass,
+  vehicleId: null as string | null,
+  garage: loadGarage(storage),
   routes: [] as AnalyzedRoute[],
   selected: 0,
   request: 0,
 };
 
-// ---------- DOM helpers ----------
+const vehicle = (): Vehicle | undefined => state.garage.find((v) => v.id === state.vehicleId);
 
-const $ = <T extends HTMLElement>(sel: string) => document.querySelector(sel) as T;
+// ---------- elements ----------
+
 const fromInput = $<HTMLInputElement>('#from');
 const toInput = $<HTMLInputElement>('#to');
+const suggestionsEl = $<HTMLUListElement>('#suggestions');
 const statusEl = $('#status');
 const routesEl = $('#routes');
 const resultEl = $('#result');
-
-function h<K extends keyof HTMLElementTagNameMap>(
-  tag: K,
-  props: Record<string, string> = {},
-  ...children: (Node | string | null | undefined | false)[]
-): HTMLElementTagNameMap[K] {
-  const el = document.createElement(tag);
-  for (const [k, v] of Object.entries(props)) {
-    if (k === 'class') el.className = v;
-    else if (k.startsWith('style:')) el.style.setProperty(k.slice(6), v);
-    else el.setAttribute(k, v);
-  }
-  for (const c of children) if (c != null && c !== false) el.append(c);
-  return el;
-}
-
-const peso = (n: number) => `₱${n.toLocaleString('en-PH')}`;
-const km = (m: number) => `${(m / 1000).toFixed(m < 10000 ? 1 : 0)} km`;
-function duration(s: number): string {
-  const m = Math.round(s / 60);
-  return m < 60 ? `${m} min` : `${Math.floor(m / 60)} h ${m % 60} min`;
-}
+const vehicleSelect = $<HTMLSelectElement>('#vehicle');
+const sheet = createSheet($('#sheet'), $('#sheet-handle'));
 
 function setStatus(msg: string, kind: 'info' | 'error' | 'busy' = 'info') {
   statusEl.textContent = msg;
-  statusEl.className = msg ? `status ${kind}` : '';
+  statusEl.className = `status ${kind}`;
 }
 
 // ---------- map ----------
 
-const map = L.map('map', { zoomControl: false }).setView([14.95, 120.9], 9);
+const map = L.map('map', { zoomControl: false, attributionControl: true }).setView([14.95, 120.9], 9);
 L.control.zoom({ position: 'topright' }).addTo(map);
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 19,
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
 }).addTo(map);
 
 const plazaLayer = L.layerGroup();
 for (const p of plazas) {
   const e = EXPRESSWAY_BY_ID[p.expressways[0]];
-  L.circleMarker([p.lat, p.lng], { radius: 3, color: e.color, weight: 1, fillOpacity: 0.7 })
-    .bindTooltip(`${p.name} · ${p.expressways.map((id) => EXPRESSWAY_BY_ID[id].shortName).join(' / ')}`)
+  L.circleMarker([p.lat, p.lng], { radius: 3, color: e.color, weight: 1, fillOpacity: 0.8 })
+    .bindTooltip(`${p.name} (${p.expressways.map((id) => EXPRESSWAY_BY_ID[id].shortName).join(', ')})`)
     .addTo(plazaLayer);
 }
-map.on('zoomend', () => {
-  if (map.getZoom() >= 11) plazaLayer.addTo(map);
-  else plazaLayer.remove();
-});
+map.on('zoomend', () => (map.getZoom() >= 12 ? plazaLayer.addTo(map) : plazaLayer.remove()));
 
 const routeLayer = L.layerGroup().addTo(map);
 const endpointLayer = L.layerGroup().addTo(map);
-
+const toLL = (c: [number, number][]) => c.map(([lng, lat]) => [lat, lng] as [number, number]);
 const pin = (cls: string, text: string) =>
   L.divIcon({ className: '', html: `<div class="pin ${cls}">${text}</div>`, iconSize: [26, 26], iconAnchor: [13, 13] });
 
-function drawEndpoints() {
-  endpointLayer.clearLayers();
-  if (state.from) L.marker(state.from, { icon: pin('pin-from', 'A'), keyboard: false }).addTo(endpointLayer);
-  if (state.to) L.marker(state.to, { icon: pin('pin-to', 'B'), keyboard: false }).addTo(endpointLayer);
+function fitTo(bounds: L.LatLngBounds) {
+  const c = sheet.coverage();
+  map.fitBounds(bounds, {
+    paddingTopLeft: [c.left + 24, 48],
+    paddingBottomRight: [48, c.bottom + 24],
+    maxZoom: 15,
+  });
 }
 
-function drawRoutes() {
+function drawEndpoints() {
+  endpointLayer.clearLayers();
+  if (state.from) L.marker(state.from, { icon: pin('pin-from', ''), keyboard: false }).addTo(endpointLayer);
+  if (state.to) L.marker(state.to, { icon: pin('pin-to', ''), keyboard: false }).addTo(endpointLayer);
+}
+
+function drawRoutes(fit = true) {
   routeLayer.clearLayers();
   state.routes.forEach((r, i) => {
-    if (i === state.selected) return;
-    L.polyline(r.route.coordinates.map(([lng, lat]) => [lat, lng] as [number, number]), {
-      color: '#94A3B8',
-      weight: 5,
-      opacity: 0.7,
-    })
-      .on('click', () => selectRoute(i))
-      .addTo(routeLayer);
+    if (i !== state.selected)
+      L.polyline(toLL(r.route.coordinates), { color: '#8E8E93', weight: 6, opacity: 0.55 })
+        .on('click', () => selectRoute(i))
+        .addTo(routeLayer);
   });
   const sel = state.routes[state.selected];
   if (!sel) return;
-  const line = L.polyline(sel.route.coordinates.map(([lng, lat]) => [lat, lng] as [number, number]), {
-    color: '#475569',
-    weight: 6,
-  }).addTo(routeLayer);
+  const line = L.polyline(toLL(sel.route.coordinates), { color: '#007AFF', weight: 7 }).addTo(routeLayer);
   sel.segments.forEach((s, idx) => {
-    const color = EXPRESSWAY_BY_ID[s.expressways[0]].color;
-    L.polyline(s.coordinates.map(([lng, lat]) => [lat, lng] as [number, number]), { color, weight: 8 }).addTo(routeLayer);
-    const label = `${idx + 1}`;
-    if (s.entry)
-      L.marker([s.entry.lat, s.entry.lng], { icon: pin('pin-entry', label) })
-        .bindTooltip(`Enter ${s.entry.name}`, { direction: 'top' })
-        .addTo(routeLayer);
-    if (s.exit)
-      L.marker([s.exit.lat, s.exit.lng], { icon: pin('pin-exit', label) })
-        .bindTooltip(`Exit ${s.exit.name}`, { direction: 'top' })
-        .addTo(routeLayer);
+    L.polyline(toLL(s.coordinates), { color: EXPRESSWAY_BY_ID[s.expressways[0]].color, weight: 7 }).addTo(routeLayer);
+    const n = String(idx + 1);
+    if (s.entry) L.marker([s.entry.lat, s.entry.lng], { icon: pin('pin-entry', n) }).bindTooltip(`Enter ${s.entry.name}`).addTo(routeLayer);
+    if (s.exit) L.marker([s.exit.lat, s.exit.lng], { icon: pin('pin-exit', n) }).bindTooltip(`Exit ${s.exit.name}`).addTo(routeLayer);
   });
-  map.fitBounds(line.getBounds(), { padding: [40, 40] });
+  if (fit) fitTo(line.getBounds());
 }
 
-// ---------- rendering ----------
+// ---------- trip rendering ----------
 
-function renderRouteTabs() {
+function renderRouteChips() {
   routesEl.replaceChildren();
   if (state.routes.length < 2) return;
-  const tabs = h('div', { class: 'route-tabs', role: 'tablist' });
   state.routes.forEach((r, i) => {
     const toll = r.price ? peso(r.price.total) + (r.price.incomplete ? '+' : '') : r.segments.length ? '…' : peso(0);
-    const btn = h(
-      'button',
-      { type: 'button', role: 'tab', 'aria-selected': String(i === state.selected), class: 'route-tab' },
-      h('span', { class: 'tab-title' }, `Route ${String.fromCharCode(65 + i)}`),
-      h('span', { class: 'tab-meta' }, `${duration(r.route.duration)} · ${km(r.route.distance)}`),
-      h('span', { class: 'tab-toll' }, toll),
+    routesEl.append(
+      h(
+        'button',
+        { type: 'button', role: 'tab', class: 'route-chip', 'aria-selected': String(i === state.selected), onclick: () => selectRoute(i) },
+        h('span', { class: 't' }, duration(r.route.duration)),
+        h('span', { class: 'm' }, `${km(r.route.distance)} · ${toll} toll`),
+      ),
     );
-    btn.addEventListener('click', () => selectRoute(i));
-    tabs.append(btn);
   });
-  routesEl.append(tabs);
 }
 
-function rfidName(r: string) {
-  return r === 'easytrip' ? 'Easytrip' : 'Autosweep';
+function renderCoverage(price: TripPrice): HTMLElement | null {
+  const v = vehicle();
+  if (!v || !Object.keys(price.byRfid).length) return null;
+  const rows = tripCoverage(price.byRfid, v);
+  const group = h('div', { class: 'group coverage' });
+  for (const c of rows) {
+    const name = RFID_NAME[c.system];
+    let kind: 'ok' | 'low' | 'unknown';
+    let title: string;
+    let sub: string;
+    if (c.noAccount) {
+      kind = 'low';
+      title = `No ${name} on ${v.name || v.plate}`;
+      sub = `This trip needs ${peso(c.needed)} on ${name}.`;
+    } else if (!c.balance) {
+      kind = 'unknown';
+      title = `${name}: ${peso(c.needed)} needed`;
+      sub = 'Balance unknown. Check it in the RFID tab.';
+    } else if (c.after! < 0) {
+      kind = 'low';
+      title = `Reload ${name} with ${peso(-c.after!)} or more`;
+      sub = `Balance ${peso(c.balance.amount)} (${ago(c.balance.at)}), trip ${peso(c.needed)}.`;
+    } else {
+      kind = 'ok';
+      title = `${name} covers this trip`;
+      sub = `${peso(c.after!)} left of ${peso(c.balance.amount)} (${ago(c.balance.at)}).`;
+    }
+    group.append(
+      h(
+        'div',
+        { class: 'cell' },
+        h('span', { class: `icon ${kind}` }, icon(kind === 'ok' ? ICONS.check : kind === 'low' ? ICONS.warn : ICONS.question, 16)),
+        h('div', { class: 'text' }, h('div', { class: 'title' }, title), h('div', { class: 'sub' }, sub)),
+      ),
+    );
+  }
+  if (rows.some((c) => c.balance)) {
+    group.append(
+      h(
+        'button',
+        {
+          type: 'button',
+          class: 'cell-link',
+          onclick: () => {
+            if (!confirm(`Deduct ${peso(price.total)} for this trip from ${v.name || v.plate}'s balances?`)) return;
+            saveVehicle(deductTrip(v, price.byRfid));
+          },
+        },
+        h('span', { class: 'grow' }, 'I drove this trip, deduct tolls'),
+      ),
+    );
+  }
+  return group;
 }
 
 function renderResult() {
@@ -174,78 +203,96 @@ function renderResult() {
   const sel = state.routes[state.selected];
   if (!sel) return;
   const { route, segments, price, priceError } = sel;
+  const view = h('div', { class: 'view' });
 
+  const total = segments.length === 0 ? peso(0) : price ? peso(price.total) + (price.incomplete ? '+' : '') : '…';
   const summary = h(
     'div',
-    { class: 'summary' },
-    h(
-      'div',
-      { class: 'summary-main' },
-      h('span', { class: 'summary-label' }, 'Total toll'),
-      h(
-        'span',
-        { class: 'summary-total' },
-        segments.length === 0 ? peso(0) : price ? peso(price.total) + (price.incomplete ? '+' : '') : '…',
-      ),
-    ),
-    h('div', { class: 'summary-meta' }, `${duration(route.duration)} · ${km(route.distance)}`),
+    { class: 'group summary' },
+    h('div', { class: 'eyebrow' }, segments.length ? `Toll for Class ${state.vclass}` : 'Toll'),
+    h('div', { class: 'total' }, total),
+    h('div', { class: 'meta' }, `${duration(route.duration)} · ${km(route.distance)}`),
   );
   if (price && Object.keys(price.byRfid).length) {
-    const chips = h('div', { class: 'rfid-totals' });
-    for (const [r, v] of Object.entries(price.byRfid)) {
-      chips.append(h('span', { class: `rfid rfid-${r}` }, `${rfidName(r)} ${peso(v)}`));
-    }
-    summary.append(chips);
+    summary.append(
+      h(
+        'div',
+        { class: 'wallet-split' },
+        ...(Object.entries(price.byRfid) as [RfidSystem, number][]).map(([s, v]) =>
+          h('span', {}, h('span', { class: `rfid-dot ${s}` }), RFID_NAME[s], h('b', {}, peso(v))),
+        ),
+      ),
+    );
   }
-  resultEl.append(summary);
+  view.append(summary);
 
-  if (priceError) resultEl.append(h('p', { class: 'warn' }, priceError));
-  if (price?.incomplete) resultEl.append(h('p', { class: 'warn' }, 'Some segments could not be priced; the total is a minimum.'));
+  if (priceError) view.append(h('p', { class: 'status error' }, priceError));
+  if (price?.incomplete) view.append(h('p', { class: 'section-foot' }, 'Some stretches could not be priced, so the total is a minimum.'));
+  if (price) {
+    const cov = renderCoverage(price);
+    if (cov) view.append(cov);
+  }
 
   if (!segments.length) {
-    resultEl.append(h('p', { class: 'empty' }, 'No tolled expressways on this route.'));
+    view.append(h('div', { class: 'group' }, h('p', { class: 'empty' }, 'No toll roads on this route.')));
+    resultEl.append(view);
     return;
   }
 
-  const list = h('ol', { class: 'segments' });
+  view.append(h('div', { class: 'section-title' }, `${segments.length} toll ${segments.length === 1 ? 'stretch' : 'stretches'}`));
+  const list = h('div', { class: 'group' });
   segments.forEach((s, idx) => {
     const priced = price?.segments[idx];
     const roads = s.expressways.map((id) => EXPRESSWAY_BY_ID[id]);
-    const color = roads[0].color;
     const approx = [s.entry, s.exit].some((p) => p && APPROX_SOURCES.has(p.source));
-    const fee = priced ? (priced.fee != null ? peso(priced.fee) : '—') : '…';
-    const li = h(
-      'li',
-      { class: 'segment', 'style:--road': color },
+    const feeText = priced ? (priced.fee != null ? peso(priced.fee) : 'No fare') : '…';
+    list.append(
       h(
         'div',
-        { class: 'seg-head' },
-        h('span', { class: 'seg-num' }, String(idx + 1)),
-        h('span', { class: 'seg-road' }, roads.map((r) => r.shortName).join(' → ')),
-        h('span', { class: `rfid rfid-${s.rfid}` }, rfidName(s.rfid)),
-        h('span', { class: 'seg-fee' }, fee),
+        {
+          class: 'cell segment',
+          role: 'button',
+          tabindex: '0',
+          'style:--road': roads[0].color,
+          onclick: () => fitTo(L.latLngBounds(toLL(s.coordinates))),
+        },
+        h('span', { class: 'seg-rail' }),
+        h(
+          'div',
+          { class: 'seg-main' },
+          h(
+            'div',
+            { class: 'seg-top' },
+            h('span', { class: 'seg-road' }, roads.map((r) => r.shortName).join(' to ')),
+            h('span', { class: `seg-fee${priced && priced.fee == null ? ' missing' : ''}` }, feeText),
+          ),
+          h(
+            'div',
+            { class: 'seg-plazas' },
+            h('span', { class: 'k' }, 'Enter'),
+            h('span', {}, s.entry?.name ?? 'Unknown'),
+            h('span', { class: 'k' }, 'Exit'),
+            h('span', {}, s.exit?.name ?? 'Unknown'),
+          ),
+          h(
+            'div',
+            { class: 'seg-foot' },
+            h('span', { class: `rfid-dot ${s.rfid}` }),
+            h('span', { class: `rfid-label ${s.rfid}` }, RFID_NAME[s.rfid]),
+            h('span', {}, `· ${km(s.endOffset - s.startOffset)}`),
+          ),
+          priced?.note ? h('div', { class: 'seg-note' }, priced.note) : null,
+          approx ? h('div', { class: 'seg-note' }, 'Plaza location is approximate.') : null,
+        ),
       ),
-      h(
-        'div',
-        { class: 'seg-plazas' },
-        h('div', {}, h('span', { class: 'tag tag-in' }, 'Enter'), s.entry?.name ?? 'Unknown plaza'),
-        h('div', {}, h('span', { class: 'tag tag-out' }, 'Exit'), s.exit?.name ?? 'Unknown plaza'),
-      ),
-      h('div', { class: 'seg-meta' }, `${km(s.endOffset - s.startOffset)} on ${roads.map((r) => r.name).join(', ')}`),
-      priced?.note ? h('div', { class: 'seg-note' }, priced.note) : null,
-      approx ? h('div', { class: 'seg-note' }, 'Plaza position is approximate; check the entry/exit shown.') : null,
     );
-    li.addEventListener('click', () => {
-      const b = L.latLngBounds(s.coordinates.map(([lng, lat]) => [lat, lng] as [number, number]));
-      map.fitBounds(b, { padding: [60, 60] });
-    });
-    list.append(li);
   });
-  resultEl.append(list);
+  view.append(list);
+  resultEl.append(view);
 }
 
 function render() {
-  renderRouteTabs();
+  renderRouteChips();
   renderResult();
 }
 
@@ -254,6 +301,69 @@ function selectRoute(i: number) {
   drawRoutes();
   render();
 }
+
+// ---------- vehicles ----------
+
+function renderVehicles() {
+  vehicleSelect.hidden = state.garage.length === 0;
+  vehicleSelect.replaceChildren(
+    h('option', { value: '' }, 'Any vehicle'),
+    ...state.garage.map((v) => h('option', { value: v.id, selected: v.id === state.vehicleId }, v.name || v.plate || 'Vehicle')),
+  );
+  renderGarage($('#garage'), state.garage, { save: saveVehicle, remove: removeVehicle });
+}
+
+function saveVehicle(v: Vehicle) {
+  const i = state.garage.findIndex((x) => x.id === v.id);
+  if (i >= 0) state.garage[i] = v;
+  else state.garage.push(v);
+  saveGarage(state.garage, storage);
+  if (!state.vehicleId || state.vehicleId === v.id) selectVehicle(v.id);
+  else renderVehicles();
+  render();
+}
+
+function removeVehicle(id: string) {
+  state.garage = state.garage.filter((v) => v.id !== id);
+  saveGarage(state.garage, storage);
+  if (state.vehicleId === id) state.vehicleId = null;
+  renderVehicles();
+  render();
+}
+
+function selectVehicle(id: string | null) {
+  state.vehicleId = id;
+  const v = vehicle();
+  renderVehicles();
+  if (v && v.vclass !== state.vclass) setClass(v.vclass);
+  else render();
+}
+
+vehicleSelect.addEventListener('change', () => selectVehicle(vehicleSelect.value || null));
+
+// ---------- class ----------
+
+function setClass(c: VehicleClass) {
+  state.vclass = c;
+  document.querySelectorAll<HTMLButtonElement>('#vclass button').forEach((b) => b.setAttribute('aria-checked', String(Number(b.dataset.class) === c)));
+  syncUrl();
+  reprice();
+}
+document.querySelectorAll<HTMLButtonElement>('#vclass button').forEach((b) =>
+  b.addEventListener('click', () => setClass(Number(b.dataset.class) as VehicleClass)),
+);
+
+// ---------- views ----------
+
+document.querySelectorAll<HTMLButtonElement>('.sheet-handle [data-view]').forEach((b) =>
+  b.addEventListener('click', () => {
+    const view = b.dataset.view!;
+    document.querySelectorAll('.sheet-handle [data-view]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+    $('#view-trip').hidden = view !== 'trip';
+    $('#view-rfid').hidden = view !== 'rfid';
+    if (sheet.snap() === 'peek') sheet.setSnap('half');
+  }),
+);
 
 // ---------- flow ----------
 
@@ -266,7 +376,7 @@ function syncUrl() {
 }
 
 async function priceAll(req: number) {
-  // Sequential on purpose: the fare API rate-limits bursts. Cached pairs return instantly.
+  // One at a time: the fare API rate-limits bursts. Cached pairs return instantly.
   for (const r of state.routes) {
     if (req !== state.request) return;
     try {
@@ -284,13 +394,14 @@ async function plan() {
   drawEndpoints();
   if (!state.from || !state.to) return;
   const req = ++state.request;
-  setStatus('Finding routes…', 'busy');
+  setStatus('Finding routes', 'busy');
   try {
     const routes = await fetchRoutes(state.from, state.to);
     if (req !== state.request) return;
     state.routes = routes.map((route) => ({ route, segments: detectTollSegments(route, plazas) }));
     state.selected = 0;
     setStatus('');
+    if (sheet.snap() === 'full' && !isWide()) sheet.setSnap('half');
     drawRoutes();
     render();
     await priceAll(req);
@@ -304,7 +415,7 @@ async function plan() {
 }
 
 async function reprice() {
-  if (!state.routes.length) return;
+  if (!state.routes.length) return render();
   const req = ++state.request;
   for (const r of state.routes) r.price = undefined;
   render();
@@ -317,84 +428,95 @@ function setEndpoint(which: 'from' | 'to', p: Endpoint) {
   plan();
 }
 
-// ---------- inputs ----------
+// ---------- search ----------
 
-function attachSearch(input: HTMLInputElement, list: HTMLUListElement, which: 'from' | 'to') {
-  let timer: number | undefined;
-  let ctrl: AbortController | undefined;
-  let results: Place[] = [];
-  let active = -1;
+let searchFor: 'from' | 'to' = 'from';
+let results: Place[] = [];
+let active = -1;
+let timer: number | undefined;
+let ctrl: AbortController | undefined;
 
-  const close = () => {
-    list.hidden = true;
-    active = -1;
-  };
-  const choose = (p: Place) => {
-    close();
-    setEndpoint(which, { lat: p.lat, lng: p.lng, label: p.label });
-  };
-  const paint = () => {
-    list.replaceChildren(
-      ...results.map((p, i) => {
-        const li = h(
-          'li',
-          { role: 'option', 'aria-selected': String(i === active) },
-          h('span', { class: 'sug-label' }, p.label),
-          h('span', { class: 'sug-detail' }, p.detail),
-        );
-        li.addEventListener('mousedown', (ev) => {
-          ev.preventDefault();
-          choose(p);
-        });
-        return li;
-      }),
-    );
-    list.hidden = results.length === 0;
-  };
+function closeSuggestions() {
+  suggestionsEl.hidden = true;
+  active = -1;
+}
 
+function paintSuggestions() {
+  suggestionsEl.replaceChildren(
+    ...results.map((p, i) =>
+      h(
+        'li',
+        {
+          role: 'option',
+          'aria-selected': String(i === active),
+          onmousedown: (ev: Event) => {
+            ev.preventDefault();
+            choose(p);
+          },
+        },
+        h('span', { class: 'sug-label' }, p.label),
+        p.detail ? h('span', { class: 'sug-detail' }, p.detail) : null,
+      ),
+    ),
+  );
+  suggestionsEl.hidden = results.length === 0;
+}
+
+function choose(p: Place) {
+  closeSuggestions();
+  (searchFor === 'from' ? fromInput : toInput).blur();
+  setEndpoint(searchFor, { lat: p.lat, lng: p.lng, label: p.label });
+}
+
+for (const [input, which] of [
+  [fromInput, 'from'],
+  [toInput, 'to'],
+] as const) {
+  input.addEventListener('focus', () => {
+    searchFor = which;
+    if (!isWide()) sheet.setSnap('full');
+  });
   input.addEventListener('input', () => {
+    searchFor = which;
     window.clearTimeout(timer);
     const q = input.value.trim();
-    if (q.length < 3) return close();
+    if (q.length < 3) return closeSuggestions();
     timer = window.setTimeout(async () => {
       ctrl?.abort();
       ctrl = new AbortController();
       try {
         results = await searchPlaces(q, state.from ?? state.to ?? undefined, ctrl.signal);
         active = -1;
-        paint();
+        paintSuggestions();
       } catch (e) {
         if ((e as Error).name !== 'AbortError') setStatus((e as Error).message, 'error');
       }
     }, 300);
   });
   input.addEventListener('keydown', (ev) => {
-    if (list.hidden) return;
+    if (suggestionsEl.hidden) return;
     if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
       ev.preventDefault();
       active = (active + (ev.key === 'ArrowDown' ? 1 : -1) + results.length) % results.length;
-      paint();
+      paintSuggestions();
     } else if (ev.key === 'Enter' && results.length) {
       ev.preventDefault();
       choose(results[Math.max(active, 0)]);
-    } else if (ev.key === 'Escape') close();
+    } else if (ev.key === 'Escape') closeSuggestions();
   });
-  input.addEventListener('blur', () => window.setTimeout(close, 150));
+  input.addEventListener('blur', () => window.setTimeout(closeSuggestions, 150));
 }
-
-attachSearch(fromInput, $('#from-suggestions'), 'from');
-attachSearch(toInput, $('#to-suggestions'), 'to');
 
 $('#locate').addEventListener('click', () => {
   if (!navigator.geolocation) return setStatus('Location is not available in this browser.', 'error');
-  setStatus('Getting your location…', 'busy');
+  setStatus('Locating', 'busy');
   navigator.geolocation.getCurrentPosition(
     (pos) => {
       setStatus('');
-      setEndpoint('from', { lat: pos.coords.latitude, lng: pos.coords.longitude, label: 'My location' });
+      setEndpoint('from', { lat: pos.coords.latitude, lng: pos.coords.longitude, label: 'My Location' });
       if (!state.to) map.setView([pos.coords.latitude, pos.coords.longitude], 13);
     },
-    (err) => setStatus(`Could not get your location: ${err.message}`, 'error'),
+    (err) => setStatus(`Could not get your location. ${err.message}`, 'error'),
     { enableHighAccuracy: true, timeout: 15000 },
   );
 });
@@ -406,39 +528,34 @@ $('#swap').addEventListener('click', () => {
   plan();
 });
 
-document.querySelectorAll<HTMLInputElement>('input[name=vclass]').forEach((r) =>
-  r.addEventListener('change', () => {
-    state.vclass = Number(r.value) as VehicleClass;
-    syncUrl();
-    reprice();
-  }),
-);
-
 map.on('click', (ev: L.LeafletMouseEvent) => {
-  const p = { lat: ev.latlng.lat, lng: ev.latlng.lng, label: `${ev.latlng.lat.toFixed(5)}, ${ev.latlng.lng.toFixed(5)}` };
+  const p = { lat: ev.latlng.lat, lng: ev.latlng.lng, label: 'Dropped Pin' };
   // First tap sets the start; later taps set (or move) the destination.
   setEndpoint(state.from ? 'to' : 'from', p);
 });
 
-// ---------- restore from URL ----------
+// ---------- start ----------
 
-function parsePoint(s: string | null): Endpoint | null {
+function parsePoint(s: string | null, label: string): Endpoint | null {
   const m = s?.match(/^(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)$/);
-  return m ? { lat: +m[1], lng: +m[2], label: `${(+m[1]).toFixed(5)}, ${(+m[2]).toFixed(5)}` } : null;
+  return m ? { lat: +m[1], lng: +m[2], label } : null;
 }
 
 const params = new URLSearchParams(location.search);
-state.from = parsePoint(params.get('from'));
-state.to = parsePoint(params.get('to'));
+state.from = parsePoint(params.get('from'), 'Shared Start');
+state.to = parsePoint(params.get('to'), 'Shared Destination');
 const cls = Number(params.get('class'));
-if (cls === 2 || cls === 3) {
-  state.vclass = cls;
-  document.querySelector<HTMLInputElement>(`input[name=vclass][value="${cls}"]`)!.checked = true;
+if (state.garage.length) {
+  state.vehicleId = state.garage[0].id;
+  if (!cls) state.vclass = state.garage[0].vclass;
 }
+if (cls === 2 || cls === 3) state.vclass = cls;
+document.querySelectorAll<HTMLButtonElement>('#vclass button').forEach((b) => b.setAttribute('aria-checked', String(Number(b.dataset.class) === state.vclass)));
 fromInput.value = state.from?.label ?? '';
 toInput.value = state.to?.label ?? '';
+renderVehicles();
 if (state.from && state.to) plan();
 else {
   drawEndpoints();
-  setStatus('Tap the map or search to set where you start and where you are going.');
+  setStatus('Search for a place or tap the map.');
 }

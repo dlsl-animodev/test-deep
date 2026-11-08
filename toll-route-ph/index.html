@@ -3,61 +3,76 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="description" content="Plan a drive in Luzon and see every toll plaza you enter and exit, with the toll fee per expressway." />
-    <title>Toll Route PH</title>
+    <meta name="description" content="See every toll plaza on your route, what it costs, and whether your RFID load covers it." />
+    <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>Sakto</title>
   </head>
   <body>
-    <div id="app">
-      <aside id="panel" aria-label="Trip planner">
-        <header class="brand">
-          <h1>Toll Route PH</h1>
-          <p>Every toll entry, exit and fee on your route</p>
-        </header>
+    <main id="map" aria-label="Map"></main>
 
-        <form id="trip" autocomplete="off" onsubmit="return false">
-          <div class="field">
-            <label for="from">From</label>
-            <div class="input-row">
-              <span class="dot dot-from" aria-hidden="true"></span>
-              <input id="from" type="search" placeholder="Search a place or tap the map" />
-              <button type="button" id="locate" class="icon-btn" title="Use my location" aria-label="Use my location">
-                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm9 3h-2.07A7 7 0 0 0 13 5.07V3h-2v2.07A7 7 0 0 0 5.07 11H3v2h2.07A7 7 0 0 0 11 18.93V21h2v-2.07A7 7 0 0 0 18.93 13H21v-2Zm-9 6a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"/></svg>
+    <section id="sheet" class="sheet" data-snap="half" aria-label="Trip planner">
+      <div class="sheet-handle" id="sheet-handle">
+        <div class="grabber" aria-hidden="true"></div>
+        <div class="segmented" role="tablist" aria-label="View">
+          <button type="button" role="tab" data-view="trip" aria-selected="true">Trip</button>
+          <button type="button" role="tab" data-view="rfid" aria-selected="false">RFID</button>
+        </div>
+      </div>
+
+      <div class="sheet-body" id="sheet-body">
+        <!-- Trip -->
+        <div id="view-trip" class="view">
+          <div class="group places">
+            <div class="cell place-cell">
+              <span class="place-dot from" aria-hidden="true"></span>
+              <input id="from" type="search" enterkeyhint="search" placeholder="Starting point" aria-label="Starting point" />
+              <button type="button" id="locate" class="plain-icon" aria-label="Use my location">
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M20.6 3.4a.9.9 0 0 0-1-.2L3.7 9.9a.9.9 0 0 0 .1 1.7l6.6 2 2 6.6a.9.9 0 0 0 1.7.1l6.7-15.9a.9.9 0 0 0-.2-1Z"/></svg>
               </button>
             </div>
-            <ul class="suggestions" id="from-suggestions" role="listbox" hidden></ul>
-          </div>
-          <div class="field">
-            <label for="to">To</label>
-            <div class="input-row">
-              <span class="dot dot-to" aria-hidden="true"></span>
-              <input id="to" type="search" placeholder="Search a place or tap the map" />
-              <button type="button" id="swap" class="icon-btn" title="Swap from and to" aria-label="Swap from and to">
-                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M7 3 3 7l4 4V8h7V6H7V3Zm10 10v3h-7v2h7v3l4-4-4-4Z"/></svg>
+            <div class="cell place-cell">
+              <span class="place-dot to" aria-hidden="true"></span>
+              <input id="to" type="search" enterkeyhint="search" placeholder="Destination" aria-label="Destination" />
+              <button type="button" id="swap" class="plain-icon" aria-label="Swap start and destination">
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M7.3 3.3a1 1 0 0 1 1.4 0l3.5 3.5a1 1 0 1 1-1.4 1.4L9 6.4V16a1 1 0 1 1-2 0V6.4L5.2 8.2a1 1 0 0 1-1.4-1.4l3.5-3.5Zm8.7 4.7a1 1 0 0 1 1 1v8.6l1.8-1.8a1 1 0 1 1 1.4 1.4l-3.5 3.5a1 1 0 0 1-1.4 0l-3.5-3.5a1 1 0 1 1 1.4-1.4l1.8 1.8V9a1 1 0 0 1 1-1Z"/></svg>
               </button>
             </div>
-            <ul class="suggestions" id="to-suggestions" role="listbox" hidden></ul>
+            <ul class="suggestions" id="suggestions" role="listbox" hidden></ul>
           </div>
-          <fieldset class="classes">
-            <legend>Vehicle class</legend>
-            <label><input type="radio" name="vclass" value="1" checked /><span><b>Class 1</b> Car, SUV, van</span></label>
-            <label><input type="radio" name="vclass" value="2" /><span><b>Class 2</b> Bus, light truck</span></label>
-            <label><input type="radio" name="vclass" value="3" /><span><b>Class 3</b> Large truck</span></label>
-          </fieldset>
-        </form>
 
-        <div id="status" role="status" aria-live="polite"></div>
-        <div id="routes"></div>
-        <div id="result"></div>
+          <div class="vehicle-row">
+            <select id="vehicle" class="pill-select" aria-label="Vehicle" hidden></select>
+            <div class="segmented small" id="vclass" role="radiogroup" aria-label="Vehicle class">
+              <button type="button" role="radio" data-class="1" aria-checked="true">Class 1</button>
+              <button type="button" role="radio" data-class="2" aria-checked="false">Class 2</button>
+              <button type="button" role="radio" data-class="3" aria-checked="false">Class 3</button>
+            </div>
+          </div>
 
-        <footer class="fineprint">
-          Fares from the <a href="https://www.expressway.ph/developers" target="_blank" rel="noopener">Expressway.PH API</a>
-          (unofficial, compiled from TRB matrices). Routing © <a href="https://project-osrm.org" target="_blank" rel="noopener">OSRM</a>,
-          map data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors.
-          Check the fee shown at the plaza.
-        </footer>
-      </aside>
-      <main id="map" aria-label="Map"></main>
-    </div>
+          <p id="status" class="status" role="status" aria-live="polite"></p>
+          <div id="routes" class="routes"></div>
+          <div id="result"></div>
+        </div>
+
+        <!-- RFID -->
+        <div id="view-rfid" class="view" hidden>
+          <div id="garage"></div>
+        </div>
+
+        <p class="fineprint">
+          Fares: <a href="https://www.expressway.ph/developers" target="_blank" rel="noopener">Expressway.PH</a>, compiled from TRB matrices.
+          Routes: <a href="https://project-osrm.org" target="_blank" rel="noopener">OSRM</a>.
+          Map: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>.
+          Always check the fee shown at the plaza.
+        </p>
+      </div>
+    </section>
+
+    <dialog id="vehicle-dialog" class="modal" aria-labelledby="vehicle-dialog-title"></dialog>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

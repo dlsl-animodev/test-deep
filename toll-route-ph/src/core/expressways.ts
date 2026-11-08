@@ -66,7 +66,7 @@ export const EXPRESSWAYS: Expressway[] = [
   },
   {
     id: 'sctex',
-    name: 'Subic–Clark–Tarlac Expressway',
+    name: 'Subic-Clark-Tarlac Expressway',
     shortName: 'SCTEX',
     operator: 'NLEX Corporation (MPTC)',
     rfid: 'easytrip',
@@ -76,7 +76,7 @@ export const EXPRESSWAYS: Expressway[] = [
   },
   {
     id: 'tplex',
-    name: 'Tarlac–Pangasinan–La Union Expressway',
+    name: 'Tarlac-Pangasinan-La Union Expressway',
     shortName: 'TPLEX',
     operator: 'Private Infra Dev Corp (SMC)',
     rfid: 'autosweep',
@@ -138,7 +138,7 @@ export const EXPRESSWAYS: Expressway[] = [
   },
   {
     id: 'mcx',
-    name: 'Muntinlupa–Cavite Expressway',
+    name: 'Muntinlupa-Cavite Expressway',
     shortName: 'MCX',
     operator: 'Ayala Corp / MPTC',
     rfid: 'easytrip',
@@ -168,7 +168,7 @@ export const EXPRESSWAYS: Expressway[] = [
   },
   {
     id: 'cavitex-c5',
-    name: 'CAVITEX–C5 Link',
+    name: 'CAVITEX-C5 Link',
     shortName: 'C5 Link',
     operator: 'CAVITEX Infrastructure Corp (MPTC)',
     rfid: 'easytrip',
@@ -178,7 +178,7 @@ export const EXPRESSWAYS: Expressway[] = [
   },
   {
     id: 'cavitex',
-    name: 'Manila–Cavite Expressway',
+    name: 'Manila-Cavite Expressway',
     shortName: 'CAVITEX',
     operator: 'CAVITEX Infrastructure Corp (MPTC)',
     rfid: 'easytrip',
@@ -188,7 +188,7 @@ export const EXPRESSWAYS: Expressway[] = [
   },
   {
     id: 'calax',
-    name: 'Cavite–Laguna Expressway',
+    name: 'Cavite-Laguna Expressway',
     shortName: 'CALAX',
     operator: 'MPCALA Holdings (MPTC)',
     rfid: 'easytrip',

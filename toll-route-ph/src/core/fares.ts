@@ -87,7 +87,13 @@ export class ExpresswayPhFareProvider implements FareProvider {
     u.searchParams.set('origin', entry);
     u.searchParams.set('dest', exit);
     u.searchParams.set('class', String(vehicleClass));
-    const res = await fetch(u.toString());
+    let res: Response;
+    try {
+      res = await fetch(u.toString());
+    } catch {
+      // A throttled response carries no CORS headers, so the browser reports a network error.
+      throw new Error('Could not reach the fare service. It may be busy; try again in a minute.');
+    }
     if (res.status === 404) return { fee: null, note: `No fare published for ${entry} → ${exit}` };
     if (res.status === 429) throw new Error('Fare service is busy (rate limited). Try again in a minute.');
     if (!res.ok) throw new Error(`Fare lookup failed (HTTP ${res.status})`);

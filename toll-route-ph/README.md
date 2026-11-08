@@ -1,6 +1,8 @@
-# Toll Route PH
+# Sakto
 
-Pick a start and a destination (search, tap the map, or use your location). The app routes the drive, lists every **toll entry and exit plaza** on the route, and prices each expressway stretch for Class 1, 2 or 3 vehicles. It covers NLEX, SCTEX, TPLEX, Skyway (elevated and Stage 3), SLEX, STAR, NAIAX, CAVITEX (incl. C5 Link), CALAX, NLEX Connector and NLEX Harbor Link. MCX and CLLEX are detected but have no fare data yet.
+*Working name; to rename, change `<title>` in `index.html` and this heading.*
+
+Pick a start and a destination (search, tap the map, or use your location). The app routes the drive, lists every **toll entry and exit plaza** on the route, and prices each expressway stretch for Class 1, 2 or 3 vehicles. The **RFID** tab keeps your vehicles and their Easytrip / Autosweep accounts, helps you check balances, and tells you whether each wallet covers the trip. It covers NLEX, SCTEX, TPLEX, Skyway (elevated and Stage 3), SLEX, STAR, NAIAX, CAVITEX (incl. C5 Link), CALAX, NLEX Connector and NLEX Harbor Link. MCX and CLLEX are detected but have no fare data yet.
 
 Example, Cubao → Baguio, Class 1:
 
@@ -20,6 +22,19 @@ npm run build      # static site in dist/, deploy anywhere (Netlify, Vercel, Git
 ```
 
 Routes can be shared by URL: `?from=14.6195,121.0537&to=16.4023,120.5960&class=2`.
+
+## RFID balances
+
+Neither operator publishes a balance API (checked Nov 2026):
+
+| | Official channels | What the app does |
+|---|---|---|
+| **Autosweep** (SMC: Skyway, SLEX, STAR, NAIAX, TPLEX) | [Balance page](https://autosweeprfid.com/v4/web/balancemobile), Autosweep RFID app, SMS `Autosweep BALINQ <plate>` to 0917 860 8655 from the registered number | Opens the balance page; builds the SMS from the plate |
+| **Easytrip** (MPTC: NLEX, SCTEX, CAVITEX, CALAX, Harbor Link, Connector) | MyEasytrip Web login on easytrip.ph, MPT DriveHub app, SMS `BAL <12-digit account>` to 0919 160 1553 (₱1) | Opens easytrip.ph; builds the SMS from the account number |
+
+You type in the balance you get back. After that the trip view shows, per wallet, whether the balance covers the trip ("Reload Easytrip with ₱170 or more") and can deduct a trip you drove. Vehicles and account numbers stay in this browser's `localStorage`; nothing is sent anywhere.
+
+`src/core/balance.ts` has a `fetchBalance` hook per RFID system. If you get partner or fleet API access from SMC Tollways or MPTC, implement it there and the UI will read balances automatically. Automating the public balance pages would need a server (they don't allow browser cross-origin calls) and should only be done if the operators' terms allow it.
 
 ## How it works
 
@@ -52,7 +67,9 @@ OpenStreetMap quirks the detector handles:
 
 | Path | What |
 |---|---|
-| `src/main.ts`, `src/style.css`, `index.html` | UI: Leaflet map, search, route tabs, toll breakdown |
+| `src/main.ts`, `src/style.css`, `index.html` | UI: map, bottom sheet, search, routes, toll breakdown, wallet coverage |
+| `src/ui/` | Sheet (iOS detents), RFID tab and vehicle editor, DOM helpers |
+| `src/core/garage.ts`, `balance.ts` | Vehicles and wallets, trip coverage, balance channels (web page, SMS) |
 | `src/core/expressways.ts` | Expressways, operators, RFID system, fare system, road-name patterns |
 | `src/core/detect.ts` | Route → toll segments (entry/exit plazas) |
 | `src/core/fares.ts` | `FareProvider` interface + Expressway.PH implementation, pricing |
