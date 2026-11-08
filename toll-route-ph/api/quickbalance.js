@@ -3,7 +3,7 @@
 // Target URL is configurable via AUTOSWEEP_QUICKBALANCE_URL (defaults to the candidate endpoint
 // found in the Autosweep app bundle; confirm it before relying on it).
 
-const DEFAULT_URL = 'https://autosweeprfidapps.com/api/v2/mobileapp/';
+const DEFAULT_URL = 'https://autosweeprfidapps.com/api/v2/mobileapp/quickbalance';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
