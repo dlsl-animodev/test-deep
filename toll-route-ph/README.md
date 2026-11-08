@@ -30,11 +30,11 @@ Neither operator publishes a balance API (checked Nov 2026):
 | | Official channels | What the app does |
 |---|---|---|
 | **Autosweep** (SMC: Skyway, SLEX, STAR, NAIAX, TPLEX) | [Balance page](https://autosweeprfid.com/v4/web/balancemobile), Autosweep RFID app, SMS `Autosweep BALINQ <plate>` to 0917 860 8655 from the registered number | Opens the balance page; builds the SMS from the plate |
-| **Easytrip** (MPTC: NLEX, SCTEX, CAVITEX, CALAX, Harbor Link, Connector) | MyEasytrip Web login on easytrip.ph, MPT DriveHub app, SMS `BAL <12-digit account>` to 0919 160 1553 (₱1) | Opens easytrip.ph; builds the SMS from the account number |
+| **Easytrip** (MPTC: NLEX, SCTEX, CAVITEX, CALAX, Harbor Link, Connector) | [Quick Balance Inquiry](https://www.escquickbalanceinquiry.com/QBI) (no login, embedded on easytrip.ph), MPT DriveHub app, SMS `BAL <12-digit account>` to 0919 160 1553 (₱1) | Opens Quick Balance Inquiry with the account number copied; builds the SMS |
 
 You type in the balance you get back. After that the trip view shows, per wallet, whether the balance covers the trip ("Reload Easytrip with ₱170 or more") and can deduct a trip you drove. Vehicles and account numbers stay in this browser's `localStorage`; nothing is sent anywhere.
 
-`src/core/balance.ts` has a `fetchBalance` hook per RFID system. If you get partner or fleet API access from SMC Tollways or MPTC, implement it there and the UI will read balances automatically. Automating the public balance pages would need a server (they don't allow browser cross-origin calls) and should only be done if the operators' terms allow it.
+`src/core/balance.ts` has a `fetchBalance` hook per RFID system. Both no-login pages call a lookup endpoint with just the account number. To read balances automatically, capture that request once from a phone or PC in the Philippines (browser dev tools, Network tab, "Copy as cURL"), then implement `fetchBalance` against a small server you host: the pages don't allow cross-origin browser calls, and both sit behind bot protection (Cloudflare on the Easytrip side), so the server should run from a normal PH connection and only query your own fleet's account numbers.
 
 ## How it works
 

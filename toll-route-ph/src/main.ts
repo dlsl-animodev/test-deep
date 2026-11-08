@@ -147,7 +147,7 @@ function renderCoverage(price: TripPrice): HTMLElement | null {
   const v = vehicle();
   if (!v || !Object.keys(price.byRfid).length) return null;
   const rows = tripCoverage(price.byRfid, v);
-  const group = h('div', { class: 'group coverage' });
+  const stack = h('div', { class: 'stack coverage' });
   for (const c of rows) {
     const name = RFID_NAME[c.system];
     let kind: 'ok' | 'low' | 'unknown';
@@ -159,43 +159,43 @@ function renderCoverage(price: TripPrice): HTMLElement | null {
       sub = `This trip needs ${peso(c.needed)} on ${name}.`;
     } else if (!c.balance) {
       kind = 'unknown';
-      title = `${name}: ${peso(c.needed)} needed`;
-      sub = 'Balance unknown. Check it in the RFID tab.';
+      title = `${name} needs ${peso(c.needed)}`;
+      sub = 'Balance unknown. Check it in RFID.';
     } else if (c.after! < 0) {
       kind = 'low';
-      title = `Reload ${name} with ${peso(-c.after!)} or more`;
-      sub = `Balance ${peso(c.balance.amount)} (${ago(c.balance.at)}), trip ${peso(c.needed)}.`;
+      title = `Reload ${name}: ${peso(-c.after!)} short`;
+      sub = `Balance ${peso(c.balance.amount)}, updated ${ago(c.balance.at)}`;
     } else {
       kind = 'ok';
-      title = `${name} covers this trip`;
-      sub = `${peso(c.after!)} left of ${peso(c.balance.amount)} (${ago(c.balance.at)}).`;
+      title = `${name} covers it`;
+      sub = `${peso(c.after!)} left after this trip`;
     }
-    group.append(
+    stack.append(
       h(
         'div',
-        { class: 'cell' },
-        h('span', { class: `icon ${kind}` }, icon(kind === 'ok' ? ICONS.check : kind === 'low' ? ICONS.warn : ICONS.question, 16)),
-        h('div', { class: 'text' }, h('div', { class: 'title' }, title), h('div', { class: 'sub' }, sub)),
+        { class: 'row' },
+        h('span', { class: `badge ${kind}` }, icon(kind === 'ok' ? ICONS.check : kind === 'low' ? ICONS.warn : ICONS.question, 18)),
+        h('div', { class: 'lines' }, h('span', { class: 'title' }, title), h('small', {}, sub)),
       ),
     );
   }
   if (rows.some((c) => c.balance)) {
-    group.append(
+    stack.append(
       h(
         'button',
         {
           type: 'button',
-          class: 'cell-link',
+          class: 'row link',
           onclick: () => {
-            if (!confirm(`Deduct ${peso(price.total)} for this trip from ${v.name || v.plate}'s balances?`)) return;
+            if (!confirm(`Deduct ${peso(price.total)} for this trip from ${v.name || v.plate}?`)) return;
             saveVehicle(deductTrip(v, price.byRfid));
           },
         },
-        h('span', { class: 'grow' }, 'I drove this trip, deduct tolls'),
+        h('span', { class: 'grow' }, 'Drove it? Deduct the tolls'),
       ),
     );
   }
-  return group;
+  return stack;
 }
 
 function renderResult() {
@@ -208,8 +208,8 @@ function renderResult() {
   const total = segments.length === 0 ? peso(0) : price ? peso(price.total) + (price.incomplete ? '+' : '') : '…';
   const summary = h(
     'div',
-    { class: 'group summary' },
-    h('div', { class: 'eyebrow' }, segments.length ? `Toll for Class ${state.vclass}` : 'Toll'),
+    { class: 'platter summary' },
+    h('div', { class: 'eyebrow' }, `Class ${state.vclass} toll`),
     h('div', { class: 'total' }, total),
     h('div', { class: 'meta' }, `${duration(route.duration)} · ${km(route.distance)}`),
   );
@@ -219,7 +219,7 @@ function renderResult() {
         'div',
         { class: 'wallet-split' },
         ...(Object.entries(price.byRfid) as [RfidSystem, number][]).map(([s, v]) =>
-          h('span', {}, h('span', { class: `rfid-dot ${s}` }), RFID_NAME[s], h('b', {}, peso(v))),
+          h('span', { class: `chip ${s}` }, h('span', { class: `rfid-dot ${s}` }), RFID_NAME[s], h('b', {}, peso(v))),
         ),
       ),
     );
@@ -227,67 +227,62 @@ function renderResult() {
   view.append(summary);
 
   if (priceError) view.append(h('p', { class: 'status error' }, priceError));
-  if (price?.incomplete) view.append(h('p', { class: 'section-foot' }, 'Some stretches could not be priced, so the total is a minimum.'));
+  if (price?.incomplete) view.append(h('p', { class: 'section-foot' }, 'Some stretches have no published fare, so this is a minimum.'));
   if (price) {
     const cov = renderCoverage(price);
     if (cov) view.append(cov);
   }
 
   if (!segments.length) {
-    view.append(h('div', { class: 'group' }, h('p', { class: 'empty' }, 'No toll roads on this route.')));
+    view.append(h('div', { class: 'platter' }, h('p', { class: 'empty' }, 'No toll roads on this route.')));
     resultEl.append(view);
     return;
   }
 
-  view.append(h('div', { class: 'section-title' }, `${segments.length} toll ${segments.length === 1 ? 'stretch' : 'stretches'}`));
-  const list = h('div', { class: 'group' });
+  view.append(h('div', { class: 'section-title' }, segments.length === 1 ? '1 toll stretch' : `${segments.length} toll stretches`));
+  const stack = h('div', { class: 'stack' });
   segments.forEach((s, idx) => {
     const priced = price?.segments[idx];
     const roads = s.expressways.map((id) => EXPRESSWAY_BY_ID[id]);
     const approx = [s.entry, s.exit].some((p) => p && APPROX_SOURCES.has(p.source));
     const feeText = priced ? (priced.fee != null ? peso(priced.fee) : 'No fare') : '…';
-    list.append(
+    const stop = (kind: 'in' | 'out', label: string, name: string) =>
+      h(
+        'div',
+        { class: 'stop' },
+        h('span', { class: `stop-ico ${kind}` }, icon(kind === 'in' ? ICONS.arrowIn : ICONS.arrowOut, 15)),
+        h('div', { class: 'lines' }, h('span', { class: 'k' }, label), h('span', { class: 'v' }, name)),
+      );
+    stack.append(
       h(
         'div',
         {
-          class: 'cell segment',
+          class: 'row segment',
           role: 'button',
           tabindex: '0',
           'style:--road': roads[0].color,
           onclick: () => fitTo(L.latLngBounds(toLL(s.coordinates))),
         },
-        h('span', { class: 'seg-rail' }),
         h(
           'div',
-          { class: 'seg-main' },
-          h(
-            'div',
-            { class: 'seg-top' },
-            h('span', { class: 'seg-road' }, roads.map((r) => r.shortName).join(' to ')),
-            h('span', { class: `seg-fee${priced && priced.fee == null ? ' missing' : ''}` }, feeText),
-          ),
-          h(
-            'div',
-            { class: 'seg-plazas' },
-            h('span', { class: 'k' }, 'Enter'),
-            h('span', {}, s.entry?.name ?? 'Unknown'),
-            h('span', { class: 'k' }, 'Exit'),
-            h('span', {}, s.exit?.name ?? 'Unknown'),
-          ),
-          h(
-            'div',
-            { class: 'seg-foot' },
-            h('span', { class: `rfid-dot ${s.rfid}` }),
-            h('span', { class: `rfid-label ${s.rfid}` }, RFID_NAME[s.rfid]),
-            h('span', {}, `· ${km(s.endOffset - s.startOffset)}`),
-          ),
-          priced?.note ? h('div', { class: 'seg-note' }, priced.note) : null,
-          approx ? h('div', { class: 'seg-note' }, 'Plaza location is approximate.') : null,
+          { class: 'seg-top' },
+          h('span', { class: 'road' }, roads.map((r) => r.shortName).join(' · ')),
+          h('span', { class: 'grow' }),
+          h('span', { class: `seg-fee${priced && priced.fee == null ? ' missing' : ''}` }, feeText),
         ),
+        h('div', { class: 'stops' }, stop('in', 'Enter', s.entry?.name ?? 'Unknown'), stop('out', 'Exit', s.exit?.name ?? 'Unknown')),
+        h(
+          'div',
+          { class: 'seg-foot' },
+          h('span', { class: `rfid-dot ${s.rfid}` }),
+          h('span', {}, `${RFID_NAME[s.rfid]} · ${km(s.endOffset - s.startOffset)}`),
+        ),
+        priced?.note ? h('div', { class: 'seg-note' }, priced.note) : null,
+        approx ? h('div', { class: 'seg-note' }, 'Plaza location is approximate') : null,
       ),
     );
   });
-  view.append(list);
+  view.append(stack);
   resultEl.append(view);
 }
 
@@ -355,10 +350,10 @@ document.querySelectorAll<HTMLButtonElement>('#vclass button').forEach((b) =>
 
 // ---------- views ----------
 
-document.querySelectorAll<HTMLButtonElement>('.sheet-handle [data-view]').forEach((b) =>
+document.querySelectorAll<HTMLButtonElement>('.tabbar [data-view]').forEach((b) =>
   b.addEventListener('click', () => {
     const view = b.dataset.view!;
-    document.querySelectorAll('.sheet-handle [data-view]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+    document.querySelectorAll('.tabbar [data-view]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
     $('#view-trip').hidden = view !== 'trip';
     $('#view-rfid').hidden = view !== 'rfid';
     if (sheet.snap() === 'peek') sheet.setSnap('half');

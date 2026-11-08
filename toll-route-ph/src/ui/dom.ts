@@ -46,6 +46,9 @@ export const ICONS = {
   message: 'M4 4h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H8l-4 4V6a2 2 0 0 1 2-2Z',
   car: 'M5 11 6.5 6.5A2 2 0 0 1 8.4 5h7.2a2 2 0 0 1 1.9 1.5L19 11a2 2 0 0 1 2 2v4h-2v2h-2v-2H7v2H5v-2H3v-4a2 2 0 0 1 2-2Zm2.2 0h9.6l-1.1-3.5a.7.7 0 0 0-.7-.5H9a.7.7 0 0 0-.7.5L7.2 11ZM6.5 15a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Zm11 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z',
   plus: 'M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6V5Z',
+  xmark: 'M6.4 5 12 10.6 17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4-5.6-5.6L6.4 19 5 17.6l5.6-5.6L5 6.4z',
+  arrowIn: 'M5 6.4 6.4 5l9.6 9.6V7h2v11H7v-2h7.6z',
+  arrowOut: 'M6.4 19 5 17.6 14.6 8H7V6h11v11h-2V9.4z',
 };
 
 export const peso = (n: number) => `₱${Math.round(n).toLocaleString('en-PH')}`;

@@ -25,6 +25,7 @@ export interface BalanceChannel {
   /** Official page where a balance can be checked. */
   webUrl: string;
   webLabel: string;
+  webNote: string;
   /** Official app, if any. */
   app?: { name: string; ios?: string; android?: string };
   /** Pre-filled SMS for a balance inquiry, or null if the account lacks the needed field. */
@@ -46,7 +47,8 @@ export const BALANCE_CHANNELS: Record<RfidSystem, BalanceChannel> = {
     system: 'autosweep',
     name: 'Autosweep',
     webUrl: 'https://autosweeprfid.com/v4/web/balancemobile',
-    webLabel: 'autosweeprfid.com',
+    webLabel: 'Autosweep balance check',
+    webNote: 'Official page, no login',
     app: { name: 'Autosweep RFID' },
     sms(acc) {
       const plate = plateKey(acc.plate);
@@ -64,8 +66,10 @@ export const BALANCE_CHANNELS: Record<RfidSystem, BalanceChannel> = {
   easytrip: {
     system: 'easytrip',
     name: 'Easytrip',
-    webUrl: 'https://www.easytrip.ph/',
-    webLabel: 'easytrip.ph',
+    // Quick Balance Inquiry widget embedded on easytrip.ph; works with the account number, no login.
+    webUrl: 'https://www.escquickbalanceinquiry.com/QBI',
+    webLabel: 'Easytrip Quick Balance Inquiry',
+    webNote: 'Official page, no login',
     app: { name: 'MPT DriveHub' },
     sms(acc) {
       const account = digits(acc.account);

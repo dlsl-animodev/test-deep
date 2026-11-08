@@ -21,63 +21,79 @@ function balanceLine(v: Vehicle, s: RfidSystem) {
     'span',
     {},
     h('span', { class: `rfid-dot ${s}` }),
-    w.balance ? peso(w.balance.amount) : h('span', { class: 'none' }, 'No balance'),
+    w.balance ? peso(w.balance.amount) : h('span', { class: 'none' }, 'Unknown'),
   );
 }
 
 export function renderGarage(root: HTMLElement, vehicles: Vehicle[], handlers: GarageHandlers): void {
   root.replaceChildren();
-  root.append(h('h2', { class: 'large-title' }, 'RFID'));
+  const view = h('div', { class: 'view' }, h('h2', { class: 'large-title' }, 'RFID'));
 
   if (vehicles.length) {
-    const group = h('div', { class: 'group' });
-    for (const v of vehicles) {
-      group.append(
-        h(
-          'div',
-          { class: 'cell vehicle-cell', role: 'button', tabindex: '0', onclick: () => openVehicle(v, handlers) },
-          h('div', { class: 'text' }, h('div', { class: 'name' }, v.name || v.plate || 'Vehicle'), h('div', { class: 'plate' }, [v.plate, `Class ${v.vclass}`].filter(Boolean).join(' · '))),
-          h('div', { class: 'balances' }, ...SYSTEMS.map((s) => balanceLine(v, s))),
-          h('span', { class: 'chev' }, icon(ICONS.chevron, 14)),
+    view.append(
+      h(
+        'div',
+        { class: 'stack' },
+        ...vehicles.map((v) =>
+          h(
+            'div',
+            { class: 'row vehicle-row-item', role: 'button', tabindex: '0', onclick: () => openVehicle(v, handlers) },
+            h(
+              'div',
+              { class: 'lines' },
+              h('span', { class: 'name' }, v.name || v.plate || 'Vehicle'),
+              h('small', {}, [v.plate, `Class ${v.vclass}`].filter(Boolean).join(' · ')),
+            ),
+            h('div', { class: 'balances' }, ...SYSTEMS.map((s) => balanceLine(v, s))),
+            h('span', { class: 'trail' }, icon(ICONS.chevron, 14)),
+          ),
         ),
-      );
-    }
-    root.append(group);
+      ),
+    );
   } else {
-    root.append(
-      h('div', { class: 'group' }, h('p', { class: 'empty' }, 'Add your vehicles and their Easytrip or Autosweep accounts to see if your load covers a trip.')),
+    view.append(
+      h('div', { class: 'platter' }, h('p', { class: 'empty' }, 'Add a vehicle and its Easytrip or Autosweep account to see if your load covers a trip.')),
     );
   }
 
-  root.append(h('button', { type: 'button', class: 'btn', onclick: () => openVehicle(null, handlers) }, 'Add Vehicle'));
-  root.append(
+  view.append(h('button', { type: 'button', class: 'btn prominent', onclick: () => openVehicle(null, handlers) }, 'Add Vehicle'));
+  view.append(
     h(
       'p',
       { class: 'section-foot' },
-      'Easytrip and Autosweep have no public balance API, so checks open the official page or a pre-filled balance SMS. Enter the balance you get back and the app keeps it up to date as you log trips. Account numbers stay on this device.',
+      'Balance checks open the official Easytrip or Autosweep page with your account number copied, or a ready-to-send balance SMS. Account numbers stay on this device.',
     ),
   );
-}
-
-function field(label: string, input: HTMLInputElement) {
-  input.id ||= `f-${newId()}`;
-  return h('div', { class: 'cell field-cell' }, h('label', { for: input.id }, label), input);
+  root.append(view);
 }
 
 function input(props: Record<string, string>) {
   return h('input', { autocomplete: 'off', autocapitalize: 'characters', spellcheck: 'false', ...props }) as HTMLInputElement;
 }
 
+function field(label: string, el: HTMLInputElement) {
+  el.id ||= `f-${newId()}`;
+  return h('div', { class: 'row field' }, h('label', { for: el.id }, label), el);
+}
+
+async function copy(text: string) {
+  try {
+    await navigator.clipboard.writeText(text);
+  } catch {
+    /* clipboard blocked: the page still opens */
+  }
+}
+
 export function openVehicle(existing: Vehicle | null, handlers: GarageHandlers): void {
   const dialog = document.getElementById('vehicle-dialog') as HTMLDialogElement;
   const v: Vehicle = existing ? structuredClone(existing) : { id: newId(), name: '', plate: '', vclass: 1 };
 
-  const name = input({ placeholder: 'e.g. Innova', value: v.name, autocapitalize: 'words' });
+  const name = input({ placeholder: 'Innova', value: v.name, autocapitalize: 'words' });
   const plate = input({ placeholder: 'ABC 1234', value: v.plate });
   let vclass: VehicleClass = v.vclass;
   const classSeg = h(
     'div',
-    { class: 'segmented small', role: 'radiogroup', 'aria-label': 'Vehicle class', 'style:flex': '1' },
+    { class: 'segmented', role: 'radiogroup', 'aria-label': 'Vehicle class' },
     ...([1, 2, 3] as VehicleClass[]).map((c) =>
       h(
         'button',
@@ -99,58 +115,53 @@ export function openVehicle(existing: Vehicle | null, handlers: GarageHandlers):
   const walletSections = SYSTEMS.map((s) => {
     const ch = BALANCE_CHANNELS[s];
     const w = v[s];
-    const account = input({ placeholder: s === 'easytrip' ? '12-digit account no.' : 'Account no.', value: w?.account ?? '', inputmode: 'numeric' });
+    const account = input({ placeholder: s === 'easytrip' ? '12 digits' : 'Account no.', value: w?.account ?? '', inputmode: 'numeric' });
     const balance = input({ placeholder: '₱0', value: w?.balance ? String(w.balance.amount) : '', inputmode: 'decimal' });
     walletInputs[s] = { account, balance };
 
-    const sms = ch.sms({ system: s, account: account.value, plate: plate.value });
-    const actions = h('div', { class: 'group' });
-    const paintActions = () => {
-      const smsNow = ch.sms({ system: s, account: account.value, plate: plate.value });
+    const actions = h('div', { class: 'stack' });
+    const paint = () => {
+      const sms = ch.sms({ system: s, account: account.value, plate: plate.value });
       actions.replaceChildren(
         h(
           'a',
-          { class: 'cell-link', href: ch.webUrl, target: '_blank', rel: 'noopener' },
-          h('span', { class: 'lines' }, `Check on ${ch.webLabel}`, h('small', {}, s === 'easytrip' ? 'Log in to MyEasytrip Web' : 'Official balance page')),
-          icon(ICONS.external, 16),
+          {
+            class: 'row link',
+            href: ch.webUrl,
+            target: '_blank',
+            rel: 'noopener',
+            onclick: () => account.value && copy(account.value.replace(/\D/g, '')),
+          },
+          h('span', { class: 'lines' }, ch.webLabel, h('small', {}, account.value ? `${ch.webNote}. Account number copied.` : ch.webNote)),
+          h('span', { class: 'trail' }, icon(ICONS.external, 16)),
         ),
-        smsNow
+        sms
           ? h(
               'a',
-              { class: 'cell-link', href: smsNow.href },
-              h('span', { class: 'lines' }, 'Text balance inquiry', h('small', {}, `${smsNow.body} to ${smsNow.to}`)),
-              icon(ICONS.message, 16),
+              { class: 'row link', href: sms.href },
+              h('span', { class: 'lines' }, 'Text balance inquiry', h('small', {}, `${sms.body} to ${sms.to}`)),
+              h('span', { class: 'trail' }, icon(ICONS.message, 16)),
             )
           : h(
               'div',
-              { class: 'cell', 'style:color': 'var(--label2)', 'style:font-size': '15px' },
-              s === 'easytrip' ? 'Add the 12-digit account number to text a balance inquiry.' : 'Add the plate number to text a balance inquiry.',
+              { class: 'row' },
+              h('small', {}, s === 'easytrip' ? 'Add the 12-digit account number to text a balance inquiry.' : 'Add the plate number to text a balance inquiry.'),
             ),
       );
     };
-    paintActions();
-    account.addEventListener('input', paintActions);
-    plate.addEventListener('input', paintActions);
+    paint();
+    account.addEventListener('input', paint);
+    plate.addEventListener('input', paint);
 
     return [
       h('div', { class: 'section-title' }, ch.name),
-      h(
-        'div',
-        { class: 'group' },
-        field('Account', account),
-        field('Balance', balance),
-      ),
-      h(
-        'p',
-        { class: 'section-foot' },
-        w?.balance ? `Balance updated ${ago(w.balance.at)}.` : 'Leave the account empty if this vehicle has no ' + ch.name + '.',
-        sms?.note ? ` ${sms.note}` : '',
-      ),
+      h('div', { class: 'stack' }, field('Account', account), field('Balance', balance)),
+      w?.balance ? h('p', { class: 'section-foot' }, `Updated ${ago(w.balance.at)}`) : null,
       actions,
     ];
   });
 
-  const done = h('button', { type: 'button', class: 'bar-btn right' }, 'Done');
+  const done = h('button', { type: 'button', class: 'round-btn prominent', 'aria-label': 'Save' }, icon(ICONS.check, 22));
   done.addEventListener('click', () => {
     v.name = name.value.trim();
     v.plate = plate.value.trim().toUpperCase();
@@ -167,11 +178,7 @@ export function openVehicle(existing: Vehicle | null, handlers: GarageHandlers):
       v[s] = {
         account: acc,
         balance:
-          amount == null || Number.isNaN(amount)
-            ? undefined
-            : prev && prev.amount === amount
-              ? prev
-              : { amount, at: Date.now() },
+          amount == null || Number.isNaN(amount) ? undefined : prev && prev.amount === amount ? prev : { amount, at: Date.now() },
       };
     }
     handlers.save(v);
@@ -182,34 +189,30 @@ export function openVehicle(existing: Vehicle | null, handlers: GarageHandlers):
     h(
       'div',
       { class: 'modal-bar' },
-      h('button', { type: 'button', class: 'bar-btn left', onclick: () => dialog.close() }, 'Cancel'),
+      h('button', { type: 'button', class: 'round-btn', 'aria-label': 'Cancel', onclick: () => dialog.close() }, icon(ICONS.xmark, 20)),
       h('h2', { id: 'vehicle-dialog-title' }, existing ? 'Edit Vehicle' : 'New Vehicle'),
       done,
     ),
     h(
       'div',
       { class: 'modal-body' },
-      h('div', { class: 'section-title' }, 'Vehicle'),
-      h('div', { class: 'group' }, field('Name', name), field('Plate', plate), h('div', { class: 'cell' }, classSeg)),
+      h('div', { class: 'stack' }, field('Name', name), field('Plate', plate), h('div', { class: 'row' }, classSeg)),
       ...walletSections.flat(),
       existing
         ? h(
-            'div',
-            { class: 'group', 'style:margin-top': '12px' },
-            h(
-              'button',
-              {
-                type: 'button',
-                class: 'cell-link danger',
-                onclick: () => {
-                  if (confirm(`Delete ${existing.name || existing.plate || 'this vehicle'}?`)) {
-                    handlers.remove(existing.id);
-                    dialog.close();
-                  }
-                },
+            'button',
+            {
+              type: 'button',
+              class: 'row danger',
+              'style:margin-top': '12px',
+              onclick: () => {
+                if (confirm(`Delete ${existing.name || existing.plate || 'this vehicle'}?`)) {
+                  handlers.remove(existing.id);
+                  dialog.close();
+                }
               },
-              'Delete Vehicle',
-            ),
+            },
+            'Delete Vehicle',
           )
         : null,
     ),

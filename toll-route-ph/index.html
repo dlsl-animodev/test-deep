@@ -7,45 +7,39 @@
     <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Sakto</title>
   </head>
   <body>
     <main id="map" aria-label="Map"></main>
 
-    <section id="sheet" class="sheet" data-snap="half" aria-label="Trip planner">
-      <div class="sheet-handle" id="sheet-handle">
-        <div class="grabber" aria-hidden="true"></div>
-        <div class="segmented" role="tablist" aria-label="View">
-          <button type="button" role="tab" data-view="trip" aria-selected="true">Trip</button>
-          <button type="button" role="tab" data-view="rfid" aria-selected="false">RFID</button>
-        </div>
-      </div>
+    <section id="sheet" class="sheet glass" data-snap="half" aria-label="Trip planner">
+      <div class="sheet-handle" id="sheet-handle"><div class="grabber" aria-hidden="true"></div></div>
 
       <div class="sheet-body" id="sheet-body">
         <!-- Trip -->
         <div id="view-trip" class="view">
-          <div class="group places">
-            <div class="cell place-cell">
+          <div class="places">
+            <label class="search-pill">
               <span class="place-dot from" aria-hidden="true"></span>
               <input id="from" type="search" enterkeyhint="search" placeholder="Starting point" aria-label="Starting point" />
-              <button type="button" id="locate" class="plain-icon" aria-label="Use my location">
-                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M20.6 3.4a.9.9 0 0 0-1-.2L3.7 9.9a.9.9 0 0 0 .1 1.7l6.6 2 2 6.6a.9.9 0 0 0 1.7.1l6.7-15.9a.9.9 0 0 0-.2-1Z"/></svg>
+              <button type="button" id="locate" class="pill-icon" aria-label="Use my location">
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M20.6 3.4a.9.9 0 0 0-1-.2L3.7 9.9a.9.9 0 0 0 .1 1.7l6.6 2 2 6.6a.9.9 0 0 0 1.7.1l6.7-15.9a.9.9 0 0 0-.2-1Z"/></svg>
               </button>
-            </div>
-            <div class="cell place-cell">
+            </label>
+            <label class="search-pill">
               <span class="place-dot to" aria-hidden="true"></span>
-              <input id="to" type="search" enterkeyhint="search" placeholder="Destination" aria-label="Destination" />
-              <button type="button" id="swap" class="plain-icon" aria-label="Swap start and destination">
-                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M7.3 3.3a1 1 0 0 1 1.4 0l3.5 3.5a1 1 0 1 1-1.4 1.4L9 6.4V16a1 1 0 1 1-2 0V6.4L5.2 8.2a1 1 0 0 1-1.4-1.4l3.5-3.5Zm8.7 4.7a1 1 0 0 1 1 1v8.6l1.8-1.8a1 1 0 1 1 1.4 1.4l-3.5 3.5a1 1 0 0 1-1.4 0l-3.5-3.5a1 1 0 1 1 1.4-1.4l1.8 1.8V9a1 1 0 0 1 1-1Z"/></svg>
+              <input id="to" type="search" enterkeyhint="search" placeholder="Where to?" aria-label="Destination" />
+              <button type="button" id="swap" class="pill-icon" aria-label="Swap start and destination">
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M7.3 3.3a1 1 0 0 1 1.4 0l3.5 3.5a1 1 0 1 1-1.4 1.4L9 6.4V16a1 1 0 1 1-2 0V6.4L5.2 8.2a1 1 0 0 1-1.4-1.4l3.5-3.5Zm8.7 4.7a1 1 0 0 1 1 1v8.6l1.8-1.8a1 1 0 1 1 1.4 1.4l-3.5 3.5a1 1 0 0 1-1.4 0l-3.5-3.5a1 1 0 1 1 1.4-1.4l1.8 1.8V9a1 1 0 0 1 1-1Z"/></svg>
               </button>
-            </div>
-            <ul class="suggestions" id="suggestions" role="listbox" hidden></ul>
+            </label>
+            <ul class="suggestions platter" id="suggestions" role="listbox" hidden></ul>
           </div>
 
           <div class="vehicle-row">
             <select id="vehicle" class="pill-select" aria-label="Vehicle" hidden></select>
-            <div class="segmented small" id="vclass" role="radiogroup" aria-label="Vehicle class">
+            <div class="segmented" id="vclass" role="radiogroup" aria-label="Vehicle class">
               <button type="button" role="radio" data-class="1" aria-checked="true">Class 1</button>
               <button type="button" role="radio" data-class="2" aria-checked="false">Class 2</button>
               <button type="button" role="radio" data-class="3" aria-checked="false">Class 3</button>
@@ -63,15 +57,26 @@
         </div>
 
         <p class="fineprint">
-          Fares: <a href="https://www.expressway.ph/developers" target="_blank" rel="noopener">Expressway.PH</a>, compiled from TRB matrices.
-          Routes: <a href="https://project-osrm.org" target="_blank" rel="noopener">OSRM</a>.
-          Map: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>.
-          Always check the fee shown at the plaza.
+          Fares from <a href="https://www.expressway.ph/developers" target="_blank" rel="noopener">Expressway.PH</a> (TRB matrices).
+          Routes by <a href="https://project-osrm.org" target="_blank" rel="noopener">OSRM</a>.
+          Map © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>.
+          Check the fee shown at the plaza.
         </p>
       </div>
     </section>
 
-    <dialog id="vehicle-dialog" class="modal" aria-labelledby="vehicle-dialog-title"></dialog>
+    <nav class="tabbar glass" role="tablist" aria-label="Sections">
+      <button type="button" role="tab" data-view="trip" aria-selected="true">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M15 4.1 9 2 3.4 4A1 1 0 0 0 3 5v14.5a.6.6 0 0 0 .8.5L9 18l6 2.1 5.6-2a1 1 0 0 0 .4-.9V3.5a.6.6 0 0 0-.8-.5L15 4.1ZM10 4.6l4 1.4v13.4l-4-1.4V4.6Z"/></svg>
+        <span>Trip</span>
+      </button>
+      <button type="button" role="tab" data-view="rfid" aria-selected="false">
+        <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path fill="currentColor" d="M4 5h16a2 2 0 0 1 2 2v1H2V7a2 2 0 0 1 2-2Zm-2 6h20v6a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-6Zm3 3v2h5v-2H5Z"/></svg>
+        <span>RFID</span>
+      </button>
+    </nav>
+
+    <dialog id="vehicle-dialog" class="modal glass" aria-labelledby="vehicle-dialog-title"></dialog>
 
     <script type="module" src="/src/main.ts"></script>
   </body>
